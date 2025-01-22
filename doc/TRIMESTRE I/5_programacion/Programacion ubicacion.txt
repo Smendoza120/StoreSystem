@@ -1,0 +1,7 @@
+El codigo del programación se encuentra en la carpeta raiz del repositorio, en la carpeta TPS_FDS-2671339-HS1, dentro de ella las carpetas on codigo son:
+1)backen_market_system
+2)frontend
+
+El motivo por el cual son dos carpetas separadas y en la carpeta raiz es debido a que el backend en una Api realizada con javaScript no puede estar dentro del codigo frontend,
+adicionalmente es de facilidad el despliegue del aplicativo tomando una carpeta que se encentra en la raiz del repositorio y o es las subcarpetas adyacentes, ya que puede -
+generar errores en la ruta o path.
