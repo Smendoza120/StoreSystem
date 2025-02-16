@@ -1,0 +1,27 @@
+# Utilizar una imagen oficial de Node.js como base
+FROM node:16
+
+# Crear y definir el directorio de trabajo
+WORKDIR /app
+
+# Copiar los archivos de configuración del proyecto
+COPY package.json package-lock.json ./
+
+# Eliminar la carpeta node_modules y reinstalar dependencias
+RUN rm -rf node_modules
+
+# Instalar las dependencias del proyecto
+RUN npm install
+
+# Copiar el resto de los archivos del proyecto
+COPY . .
+
+# Construir la aplicación para producción
+RUN npm run build
+
+# Exponer el puerto donde se servirá la aplicación
+EXPOSE 3001
+
+# Servir la aplicación utilizando 'serve'
+RUN npm install -g serve
+CMD ["serve", "-s", "dist", "-l", "3001"]
