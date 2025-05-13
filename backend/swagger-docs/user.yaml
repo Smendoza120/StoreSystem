@@ -47,6 +47,180 @@
         description: Error interno del servidor.
     tags:
       - Users
+  get:
+    summary: Obtiene todos los usuarios habilitados.
+    description: Retorna una lista de todos los usuarios que están actualmente habilitados en el sistema.
+    responses:
+      '200':
+        description: Lista de usuarios habilitados.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: uuid-example
+                  fullName:
+                    type: string
+                    example: John Doe
+                  username:
+                    type: string
+                    example: johndoe123
+                  email:
+                    type: string
+                    format: email
+                    example: john.doe@example.com
+                  roles:
+                    type: array
+                    items:
+                      type: string
+                      example: employee
+                  isEnabled:
+                    type: boolean
+                    example: true
+                  permissions:
+                    type: object
+                    example: { "control_usuarios": { "read": false, "write": false, "delete": false }, "inventario": { "read": false, "write": false, "delete": false }, "ventas_diarias": { "read": true, "write": true, "delete": false } }
+    tags:
+      - Users
+
+/api/users/{id}:
+  get:
+    summary: Obtiene un usuario por su ID.
+    description: Retorna la información de un usuario específico basado en el ID proporcionado.
+    parameters:
+      - in: path
+        name: id
+        required: true
+        description: ID del usuario a obtener.
+        schema:
+          type: string
+          example: uuid-example
+    responses:
+      '200':
+        description: Usuario encontrado.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  example: uuid-example
+                fullName:
+                  type: string
+                  example: John Doe
+                username:
+                  type: string
+                  example: johndoe123
+                email:
+                  type: string
+                  format: email
+                  example: john.doe@example.com
+                roles:
+                  type: array
+                  items:
+                    type: string
+                    example: employee
+                isEnabled:
+                  type: boolean
+                  example: true
+                permissions:
+                  type: object
+                  example: { "control_usuarios": { "read": false, "write": false, "delete": false }, "inventario": { "read": false, "write": false, "delete": false }, "ventas_diarias": { "read": true, "write": true, "delete": false } }
+      '404':
+        description: Usuario no encontrado.
+    tags:
+      - Users
+  put:
+    summary: Actualiza la información de un usuario por su ID.
+    description: Permite actualizar los detalles de un usuario específico.
+    parameters:
+      - in: path
+        name: id
+        required: true
+        description: ID del usuario a actualizar.
+        schema:
+          type: string
+          example: uuid-example
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              fullName:
+                type: string
+                example: Jane Doe
+              email:
+                type: string
+                format: email
+                example: jane.doe@example.com
+              password:
+                type: string
+                example: newSecurePassword
+              roles:
+                type: array
+                items:
+                  type: string
+                  enum: [admin, employee, developer]
+                example: [admin]
+              permissions:
+                type: object
+                example: { "control_usuarios": { "read": true, "write": true, "delete": true }, "inventario": { "read": true, "write": true, "delete": true }, "ventas_diarias": { "read": true, "write": true, "delete": true } }
+    responses:
+      '200':
+        description: Información del usuario actualizada exitosamente.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  example: uuid-example
+                message:
+                  type: string
+                  example: Información del usuario actualizada exitosamente.
+      '404':
+        description: Usuario no encontrado.
+    tags:
+      - Users
+
+/api/users/{id}/disable:
+  patch:
+    summary: Deshabilita un usuario por su ID.
+    description: Marca a un usuario específico como deshabilitado.
+    parameters:
+      - in: path
+        name: id
+        required: true
+        description: ID del usuario a deshabilitar.
+        schema:
+          type: string
+          example: uuid-example
+    responses:
+      '200':
+        description: Usuario deshabilitado exitosamente.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  example: uuid-example
+                message:
+                  type: string
+                  example: Usuario deshabilitado exitosamente.
+      '404':
+        description: Usuario no encontrado.
+    tags:
+      - Users
 
 /api/auth/login:
   post:

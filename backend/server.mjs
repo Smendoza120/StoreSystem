@@ -14,10 +14,19 @@ let swaggerDocumentation;
 app.use(cors());
 app.use(express.json());
 
-const swaggerFileContent = fs.readFileSync(swaggerFilePath, 'utf8');
-swaggerDocumentation = JSON.parse(swaggerFileContent);
+// const swaggerFileContent = fs.readFileSync(swaggerFilePath, 'utf8');
+// swaggerDocumentation = JSON.parse(swaggerFileContent);
+// app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocumentation));
 
-app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocumentation));
+try {
+  const swaggerFileContent = fs.readFileSync(swaggerFilePath, 'utf8');
+  swaggerDocumentation = JSON.parse(swaggerFileContent);
+  app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocumentation));
+} catch (error) {
+  console.error("Error al leer o parsear swagger.json:", error);
+  // Considera cómo manejar este error en producción
+}
+
 
 app.get("/", (req, res) => {
   res.send(`¡El servidor backend está funcionando! en el puerto ${port}`);
