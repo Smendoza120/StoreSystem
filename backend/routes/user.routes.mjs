@@ -3,236 +3,65 @@ const router = express.Router();
 import * as userController from "../controllers/users.controller.mjs";
 
 /**
- * @swagger
- * /users:
- * post:
- * summary: Crear un nuevo usuario.
- * requestBody:
- * required: true
- * content:
- * application/json:
- * schema:
- * type: object
- * properties:
- * fullName:
- * type: string
- * description: Nombre completo del usuario.
- * email:
- * type: string
- * format: email
- * description: Correo electrónico del usuario.
- * password:
- * type: string
- * description: Contraseña del usuario.
- * roles:
- * type: array
- * items:
- * type: string
- * description: Roles asignados al usuario.
- * responses:
- * 201:
- * description: Usuario creado exitosamente.
- * content:
- * application/json:
- * schema:
- * type: object
- * properties:
- * id:
- * type: string
- * description: ID del usuario creado.
- * username:
- * type: string
- * description: Nombre de usuario generado.
- * 400:
- * description: Error en los datos de entrada.
- * 500:
- * description: Error interno del servidor.
+ * @route POST /api/users
+ * @group Users - Operaciones relacionadas con la gestión de usuarios
+ * @param {string} fullName.body.required - Nombre completo del usuario
+ * @param {string} email.body.required - Correo electrónico del usuario
+ * @param {string} password.body.required - Contraseña del usuario
+ * @param {array<string>} roles.body - Roles del usuario (opcional, por defecto [])
+ * @returns {object} 201 - Usuario creado exitosamente
+ * @returns {Error}  400 - Error si los campos requeridos no se proporcionan
+ * @returns {Error}  409 - Error si el correo electrónico ya está registrado
  */
 router.post('/', userController.createUser);
 
 /**
- * @swagger
- * /users:
- * get:
- * summary: Obtener la lista de todos los usuarios habilitados.
- * responses:
- * 200:
- * description: Lista de usuarios obtenida exitosamente.
- * content:
- * application/json:
- * schema:
- * type: array
- * items:
- * type: object
- * properties:
- * id:
- * type: string
- * description: ID del usuario.
- * fullName:
- * type: string
- * description: Nombre completo del usuario.
- * username:
- * type: string
- * description: Nombre de usuario.
- * email:
- * type: string
- * format: email
- * description: Correo electrónico del usuario.
- * roles:
- * type: array
- * items:
- * type: string
- * description: Roles asignados al usuario.
- * isEnabled:
- * type: boolean
- * description: Indica si el usuario está habilitado.
- * 500:
- * description: Error interno del servidor.
+ * @route GET /api/users
+ * @group Users - Operaciones relacionadas con la gestión de usuarios
+ * @returns {array<object>} 200 - Lista de todos los usuarios habilitados
  */
 router.get('/', userController.getAllUsers);
 
 /**
- * @swagger
- * /users/{id}:
- * get:
- * summary: Obtener un usuario por su ID.
- * parameters:
- * - in: path
- * name: id
- * required: true
- * description: ID del usuario a obtener.
- * schema:
- * type: string
- * responses:
- * 200:
- * description: Usuario obtenido exitosamente.
- * content:
- * application/json:
- * schema:
- * type: object
- * properties:
- * id:
- * type: string
- * description: ID del usuario.
- * fullName:
- * type: string
- * description: Nombre completo del usuario.
- * username:
- * type: string
- * description: Nombre de usuario.
- * email:
- * type: string
- * format: email
- * description: Correo electrónico del usuario.
- * roles:
- * type: array
- * items:
- * type: string
- * description: Roles asignados al usuario.
- * permissions:
- * type: object
- * description: Permisos manuales del usuario.
- * isEnabled:
- * type: boolean
- * description: Indica si el usuario está habilitado.
- * 404:
- * description: Usuario no encontrado.
- * 500:
- * description: Error interno del servidor.
+ * @route GET /api/users/{id}
+ * @group Users - Operaciones relacionadas con la gestión de usuarios
+ * @param {string} id.path.required - ID del usuario a obtener
+ * @returns {object} 200 - Usuario encontrado
+ * @returns {Error}  404 - Usuario no encontrado
  */
 router.get('/:id', userController.getUserById);
 
 /**
- * @swagger
- * /users/{id}:
- * put:
- * summary: Editar la información de un usuario.
- * parameters:
- * - in: path
- * name: id
- * required: true
- * description: ID del usuario a editar.
- * schema:
- * type: string
- * requestBody:
- * required: true
- * content:
- * application/json:
- * schema:
- * type: object
- * properties:
- * fullName:
- * type: string
- * description: Nuevo nombre completo del usuario.
- * email:
- * type: string
- * format: email
- * description: Nuevo correo electrónico del usuario.
- * password:
- * type: string
- * description: Nueva contraseña del usuario (opcional).
- * roles:
- * type: array
- * items:
- * type: string
- * description: Nuevos roles asignados al usuario.
- * permissions:
- * type: object
- * description: Permisos manuales actualizados del usuario.
- * responses:
- * 200:
- * description: Información del usuario actualizada exitosamente.
- * content:
- * application/json:
- * schema:
- * type: object
- * properties:
- * id:
- * type: string
- * description: ID del usuario actualizado.
- * message:
- * type: string
- * description: Mensaje de éxito.
- * 400:
- * description: Error en los datos de entrada.
- * 404:
- * description: Usuario no encontrado.
- * 500:
- * description: Error interno del servidor.
+ * @route PUT /api/users/{id}
+ * @group Users - Operaciones relacionadas con la gestión de usuarios
+ * @param {string} id.path.required - ID del usuario a actualizar
+ * @param {string} fullName.body - Nuevo nombre completo del usuario
+ * @param {string} email.body - Nuevo correo electrónico del usuario
+ * @param {string} password.body - Nueva contraseña del usuario (opcional)
+ * @param {array<string>} roles.body - Nuevos roles del usuario
+ * @param {object} permissions.body - Nuevos permisos del usuario
+ * @returns {object} 200 - Información del usuario actualizada exitosamente
+ * @returns {Error}  404 - Usuario no encontrado
  */
 router.put('/:id', userController.updateUser);
 
 /**
- * @swagger
- * /users/{id}/disable:
- * patch:
- * summary: Deshabilitar un usuario por su ID.
- * parameters:
- * - in: path
- * name: id
- * required: true
- * description: ID del usuario a deshabilitar.
- * schema:
- * type: string
- * responses:
- * 200:
- * description: Usuario deshabilitado exitosamente.
- * content:
- * application/json:
- * schema:
- * type: object
- * properties:
- * id:
- * type: string
- * description: ID del usuario deshabilitado.
- * message:
- * type: string
- * description: Mensaje de éxito.
- * 404:
- * description: Usuario no encontrado.
- * 500:
- * description: Error interno del servidor.
+ * @route PATCH /api/users/{id}/disable
+ * @group Users - Operaciones relacionadas con la gestión de usuarios
+ * @param {string} id.path.required - ID del usuario a deshabilitar
+ * @returns {object} 200 - Usuario deshabilitado exitosamente
+ * @returns {Error}  404 - Usuario no encontrado
  */
 router.patch('/:id/disable', userController.disableUser);
+
+/**
+ * @route POST /api/auth/login
+ * @group Authentication - Operaciones de autenticación de usuarios
+ * @param {string} identifier.body.required - Correo electrónico o nombre de usuario del usuario.
+ * @param {string} password.body.required - Contraseña del usuario.
+ * @returns {object} 200 - Inicio de sesión exitoso. Devuelve un token de autenticación (simulado por ahora).
+ * @returns {Error}  401 - Credenciales inválidas.
+ */
+router.post('/login', userController.loginUser);
 
 export default router;

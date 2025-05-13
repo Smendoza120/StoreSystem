@@ -1,0 +1,87 @@
+/api/users:
+  post:
+    summary: Crea un nuevo usuario.
+    description: Crea un nuevo usuario con la información proporcionada.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              fullName:
+                type: string
+                example: John Doe
+              email:
+                type: string
+                format: email
+                example: john.doe@example.com
+              password:
+                type: string
+                example: securePassword
+              roles:
+                type: array
+                items:
+                  type: string
+                  enum: [admin, employee, developer]
+                example: [employee]
+    responses:
+      '201':
+        description: Usuario creado exitosamente.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  example: uuid-example
+                username:
+                  type: string
+                  example: johndoe123
+      '400':
+        description: Error si los campos requeridos no se proporcionan.
+      '409':
+        description: Error si el correo electrónico ya está registrado.
+      '500':
+        description: Error interno del servidor.
+    tags:
+      - Users
+
+/api/auth/login:
+  post:
+    summary: Inicia sesión de usuario.
+    description: Permite iniciar sesión con correo electrónico o nombre de usuario y contraseña.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              identifier:
+                type: string
+                description: Correo electrónico o nombre de usuario del usuario.
+                example: john.doe@example.com o johndoe123
+              password:
+                type: string
+                description: Contraseña del usuario.
+                example: securePassword
+    responses:
+      '200':
+        description: Inicio de sesión exitoso. Devuelve un token de autenticación (simulado por ahora).
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Inicio de sesión exitoso
+                token:
+                  type: string
+                  example: generated_token
+      '401':
+        description: Credenciales inválidas.
+    tags:
+      - Authentication

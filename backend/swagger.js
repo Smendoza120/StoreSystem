@@ -1,22 +1,16 @@
-import swaggerjsdoc from "swagger-jsdoc";
+import swaggerAutogen from "swagger-autogen";
 
-const options = {
-  swaggerDefinition: {
-    openapi: "3.0.0",
-    info: {
-      title: "API de Inventario, Ventas y Usuarios",
-      version: "1.0.0",
-      description: "API para la gestión de inventario, control de ventas y usuarios de la tienda.",
-      servers: [
-        {
-          url: "http://localhost:3000",
-          description: "Servidor local",
-        },
-      ]
-    },
+const outputFile = "./swagger.json";
+const endPointsFiles = ["./server.mjs"];
+
+const doc = {
+  info: {
+    title: "API de Control de invenatario",
+    description: "Esta API permite gestionar los invenarios de una tienda"
   },
-  apis: ["./routes/*.mjs", "./routes/*.js"],
+  host: "localhost:3000",
+  schemes: ["http", "https"],
 };
 
-const specs = swaggerjsdoc(options);
-export default specs;
+swaggerAutogen()(outputFile, endPointsFiles, doc);
+
