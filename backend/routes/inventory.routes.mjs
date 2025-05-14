@@ -44,4 +44,14 @@ router.get('/:id', inventoryController.getProductById);
  */
 router.put('/:id', inventoryController.updateProduct);
 
+/**
+ * @route GET /api/inventory/search
+ * @group Inventory - Inventory management operations
+ * @param {string} name.query.required - Name of the product to search for.
+ * @returns {array<object>} 200 - List of products matching the search term.
+ * @returns {Error}  400 - Error if the 'name' query parameter is not provided.
+ * @returns {Error}  404 - No products found matching the search term.
+ */
+router.get('/search', inventoryController.searchProductByName);
+
 export default router;

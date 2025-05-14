@@ -139,6 +139,34 @@
     tags:
       - Inventory
 
+/api/inventory/search:
+  get:
+    summary: Search products by name.
+    description: Returns a list of products whose name contains the provided search term (case-insensitive).
+    parameters:
+      - in: query
+        name: name
+        required: true
+        description: Name of the product to search for.
+        schema:
+          type: string
+          example: potato
+    responses:
+      '200':
+        description: List of products matching the search term.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Product'
+      '400':
+        description: Error if the 'name' query parameter is not provided.
+      '404':
+        description: No products found matching the search term.
+    tags:
+      - Inventory
+
 components:
   schemas:
     Product:

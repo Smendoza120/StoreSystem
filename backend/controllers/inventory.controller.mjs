@@ -82,6 +82,27 @@ export const getProductById = (req, res) => {
   }
 };
 
+export const searchProductByName = (req, res) => {
+    console.log("Función searchProductByName ejecutada:", req.query.name);
+    const { name } = req.query;
+
+    if (!name) {
+        return res.status(400).json({ message: "Product name is required for searching." });
+    }
+
+    const results = inventory.filter(item =>
+        item.name.toLowerCase().includes(name.toLowerCase())
+    );
+
+    console.log("Resultados de la búsqueda:", results); // Agrega este log también
+
+    if (results.length > 0) {
+        return res.status(200).json(results);
+    } else {
+        return res.status(404).json({ message: `No products found with the name "${name}".` });
+    }
+};
+
 export const updateProduct = (req, res) => {
   const { id } = req.body;
   const { unitPrice, quantity, storageLocation } = req.body;
@@ -103,19 +124,15 @@ export const updateProduct = (req, res) => {
     ) {
       inventory[productIndex].storageLocation = storageLocation;
     } else if (storageLocation) {
-      return res
-        .status(400)
-        .json({
-          message: "Storage location must be 'in stock' or 'in warehouse'.",
-        });
+      return res.status(400).json({
+        message: "Storage location must be 'in stock' or 'in warehouse'.",
+      });
     }
 
-    return res
-      .status(200)
-      .json({
-        message: `Product with ID "${id}" updated`,
-        product: inventory[productIndex],
-      });
+    return res.status(200).json({
+      message: `Product with ID "${id}" updated`,
+      product: inventory[productIndex],
+    });
   } else {
     return res.status(404).json({ message: "Product not found." });
   }
