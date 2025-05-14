@@ -1,0 +1,166 @@
+/api/inventory:
+  post:
+    summary: Add a new product to the inventory or update an existing one.
+    description: Allows adding a new product or increasing the quantity of an existing product by its name.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                example: Brand X Potato Chips
+              unitPrice:
+                type: number
+                format: float
+                example: 1.50
+              quantity:
+                type: integer
+                example: 20
+              storageLocation:
+                type: string
+                enum: ["in stock", "in warehouse"]
+                example: "in stock"
+    responses:
+      '201':
+        description: Product added successfully.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Product "Brand X Potato Chips" added
+                product:
+                  $ref: '#/components/schemas/Product'
+      '200':
+        description: Quantity of existing product updated.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Quantity of "Brand X Potato Chips" updated
+                product:
+                  $ref: '#/components/schemas/Product'
+      '400':
+        description: Error if required fields are not provided or storage location is invalid.
+    tags:
+      - Inventory
+  get:
+    summary: Get the complete inventory list.
+    description: Returns an array with all products in the inventory, including their quantity, price, and location.
+    responses:
+      '200':
+        description: List of products in the inventory.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Product'
+    tags:
+      - Inventory
+
+/api/inventory/{id}:
+  get:
+    summary: Get a product from the inventory by its ID.
+    description: Returns the detailed information of a specific product identified by its unique ID.
+    parameters:
+      - in: path
+        name: id
+        required: true
+        description: ID of the product to retrieve.
+        schema:
+          type: string
+          example: abc-123-xyz
+    responses:
+      '200':
+        description: Product found.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      '404':
+        description: Product not found.
+    tags:
+      - Inventory
+  put:
+    summary: Update the information of a product by its ID.
+    description: Allows modifying the price, quantity, and location of an existing product.
+    parameters:
+      - in: path
+        name: id
+        required: true
+        description: ID of the product to update.
+        schema:
+          type: string
+          example: abc-123-xyz
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              unitPrice:
+                type: number
+                format: float
+                example: 1.75
+              quantity:
+                type: integer
+                example: 25
+              storageLocation:
+                type: string
+                enum: ["in stock", "in warehouse"]
+                example: "in warehouse"
+    responses:
+      '200':
+        description: Product updated successfully.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Product with ID "abc-123-xyz" updated
+                product:
+                  $ref: '#/components/schemas/Product'
+      '400':
+        description: Error if the provided storage location is invalid.
+      '404':
+        description: Product not found.
+    tags:
+      - Inventory
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          example: abc-123-xyz
+        name:
+          type: string
+          example: Brand X Potato Chips
+        unitPrice:
+          type: number
+          format: float
+          example: 1.50
+        quantity:
+          type: integer
+          example: 20
+        storageLocation:
+          type: string
+          example: "in stock"
+        stockStatus:
+          type: string
+          enum: ["good", "medium", "low"]
+          example: "good"

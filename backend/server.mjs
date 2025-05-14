@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs";
 import cors from "cors";
 import userRoutes from "./routes/user.routes.mjs";
+import inventoryRoutes from "./routes/inventory.routes.mjs";
 import swaggerUI from "swagger-ui-express";
 import * as userController from "./controllers/users.controller.mjs";
 
@@ -25,17 +26,17 @@ try {
   app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocumentation));
 } catch (error) {
   console.error("Error al leer o parsear swagger.json:", error);
-  // Considera cómo manejar este error en producción
 }
-
 
 app.get("/", (req, res) => {
   res.send(`¡El servidor backend está funcionando! en el puerto ${port}`);
 });
 
 
-app.use("/api/users", userRoutes);
 app.post("/api/auth/login", userController.loginUser);
+
+app.use("/api/users", userRoutes);
+app.use("/api/inventory", inventoryRoutes);
 
 app.listen(port, () => {
   console.log(`Servidor escuchando en http://localhost:${port}`);
