@@ -4,6 +4,7 @@ import fs from "fs";
 import cors from "cors";
 import userRoutes from "./routes/user.routes.mjs";
 import swaggerUI from "swagger-ui-express";
+import * as userController from "./controllers/users.controller.mjs";
 
 const app = express();
 const port = 3000;
@@ -34,6 +35,7 @@ app.get("/", (req, res) => {
 
 
 app.use("/api/users", userRoutes);
+app.post("/api/auth/login", userController.loginUser);
 
 app.listen(port, () => {
   console.log(`Servidor escuchando en http://localhost:${port}`);

@@ -23,11 +23,9 @@ export const createUser = (req, res) => {
   const { fullName, email, password, roles = [] } = req.body;
 
   if (!fullName || !email || !password) {
-    return res
-      .status(400)
-      .json({
-        message: "Todos los campos requeridos deben ser proporcionados.",
-      });
+    return res.status(400).json({
+      message: "Todos los campos requeridos deben ser proporcionados.",
+    });
   }
 
   const existingUser = users.find((user) => user.email === email);
@@ -51,20 +49,22 @@ export const createUser = (req, res) => {
     permissions: {},
   };
 
-  if (roles.includes('admin') || roles.includes('developer')) {
+  if (roles.includes("admin") || roles.includes("developer")) {
     newUser.permissions = {
-      'control_usuarios': { read: true, write: true, delete: true },
-      'inventario': { read: true, write: true, delete: true },
-      'ventas_diarias': { read: true, write: true, delete: true },
+      control_usuarios: { read: true, write: true, delete: true },
+      inventario: { read: true, write: true, delete: true },
+      ventas_diarias: { read: true, write: true, delete: true },
     };
-  } else if (roles.includes('employee')) {
+  } else if (roles.includes("employee")) {
     newUser.permissions = {
-      'control_usuarios': { read: false, write: false, delete: false },
-      'inventario': { read: false, write: false, delete: false },
-      'ventas_diarias': { read: true, write: true, delete: false },
+      control_usuarios: { read: false, write: false, delete: false },
+      inventario: { read: false, write: false, delete: false },
+      ventas_diarias: { read: true, write: true, delete: false },
     };
   } else {
-    console.warn(`Rol(es) desconocido(s) asignados a ${newUser.username}: ${roles}`);
+    console.warn(
+      `Rol(es) desconocido(s) asignados a ${newUser.username}: ${roles}`
+    );
     newUser.permissions = {};
   }
 
@@ -111,12 +111,10 @@ export const updateUser = (req, res) => {
 
   users[userIndex] = updatedUser;
 
-  return res
-    .status(200)
-    .json({
-      id: updatedUser.id,
-      message: "Información del usuario actualizada exitosamente.",
-    });
+  return res.status(200).json({
+    id: updatedUser.id,
+    message: "Información del usuario actualizada exitosamente.",
+  });
 };
 
 export const disableUser = (req, res) => {
@@ -134,24 +132,32 @@ export const disableUser = (req, res) => {
 };
 
 export const loginUser = (req, res) => {
-    const {identifier, password} = req.body;
+  const { identifier, password } = req.body;
 
-    if(!identifier || !password){
-        return res.status(400).json({ message: "Se deben proporcionar el correo electrónico/usuario y la contraseña." });
-    }
+  if (!identifier || !password) {
+    return res
+      .status(400)
+      .json({
+        message:
+          "Se deben proporcionar el correo electrónico/usuario y la contraseña.",
+      });
+  }
 
-    const user = users.find(
-        (u) => {
-            (u.email === identifier || u.username === identifier) &&
-            u.password ===password &&
-            u.isEnabled
-        }
+  const user = users.find((u) => {
+    console.log(
+      `Intentando coincidir con: <span class="math-inline">\{u\.email\}/</span>{u.username} === ${identifier}, ${u.password} === ${password}`
+    ); // <-- Agrega esto
+    return (
+      (u.email === identifier || u.username === identifier) &&
+      u.password === password &&
+      u.isEnabled
     );
+  });
 
-    if(user){
-        const token = uuidv4();
-        return res.status(200).json({ message: "Inicio de sesión exitoso", token });
-    } else {
-        return res.status(401).json({ message: "Credenciales inválidas." });
-    }
-}
+  if (user) {
+    const token = uuidv4();
+    return res.status(200).json({ message: "Inicio de sesión exitoso", token });
+  } else {
+    return res.status(401).json({ message: "Credenciales inválidas." });
+  }
+};
