@@ -26,16 +26,18 @@ interface ProductTableProps {
 }
 
 const ProductTable: React.FC<ProductTableProps> = ({ products }) => {
+  const stockAlto = 10;
+  const stockBajo = 5;
+
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
           <TableRow>
-            <TableCell>Código</TableCell>
             <TableCell>Producto</TableCell>
-            <TableCell>Categoría</TableCell>
             <TableCell>Precio</TableCell>
-            <TableCell>Stock</TableCell>
+            <TableCell>Cantidad</TableCell>
+            <TableCell>Almacenamiento</TableCell>
             <TableCell>Estado</TableCell>
             <TableCell>Acciones</TableCell>
           </TableRow>
@@ -44,28 +46,33 @@ const ProductTable: React.FC<ProductTableProps> = ({ products }) => {
         <TableBody>
           {products?.map((product) => (
             <TableRow key={product.id}>
-              <TableCell component="th" scope="row">
-                {product.id}
-              </TableCell>
               <TableCell>{product.name}</TableCell>
-              <TableCell>{product.unitPrice.toFixed(2)}</TableCell>
+              <TableCell>${product.unitPrice.toFixed(1)}</TableCell>
               <TableCell>{product.quantity}</TableCell>
-              <TableCell>{product.storageLocation}</TableCell>
+              <TableCell>
+                {product.storageLocation === "in stock"
+                  ? "En Tienda"
+                  : product.storageLocation === "in warehouse"
+                  ? "En Almacén"
+                  : product.storageLocation}
+              </TableCell>
               <TableCell>
                 <Button
                   size="small"
                   variant="outlined"
                   color={
-                    product.stockStatus === "good"
-                      ? "success"
-                      : product.stockStatus === "low"
-                      ? "warning"
-                      : "error"
+                    product.quantity > stockAlto
+                      ? "success" // En stock
+                      : product.quantity > stockBajo
+                      ? "warning" // Stock bajo
+                      : "error" // Agotado
                   }
                 >
-                  {product.stockStatus === 'good' ? 'En stock' :
-                   product.stockStatus === 'low' ? 'Stock bajo' :
-                   'Agotado'} 
+                  {product.quantity > stockAlto
+                    ? "En stock"
+                    : product.quantity > stockBajo
+                    ? "Stock bajo"
+                    : "Agotado"}
                 </Button>
               </TableCell>
               <TableCell>

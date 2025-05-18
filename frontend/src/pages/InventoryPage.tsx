@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import CreateProductForm from "../components/product/CreateProductForm";
 
-const InventarioPage: React.FC = () => {
+const InventoryPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [createProductError, setCreateProductError] = useState<string | null>(null);
@@ -45,8 +45,8 @@ const InventarioPage: React.FC = () => {
 
       if (response.ok) {
         setCreateProductSuccess(true);
-        refetchInventory(); // Recargar los datos del inventario
-        setTimeout(() => setCreateProductSuccess(false), 3000); // Limpiar el mensaje de éxito
+        refetchInventory(); 
+        setTimeout(() => setCreateProductSuccess(false), 3000); 
       } else {
         const errorData = await response.json();
         setCreateProductError(errorData.message || 'Error al crear el producto');
@@ -124,4 +124,4 @@ const InventarioPage: React.FC = () => {
   );
 };
 
-export default InventarioPage;
+export default InventoryPage;

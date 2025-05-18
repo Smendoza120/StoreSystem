@@ -2,7 +2,7 @@
 import './App.css'
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import InventarioPage from './pages/Inventory';
+import InventoryPage from './pages/InventoryPage';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 
@@ -14,8 +14,8 @@ const App: React.FC = () => {
       <CssBaseline />
       <BrowserRouter>
         <Routes>
-          <Route path="/inventario" element={<InventarioPage />} />
-          <Route path="/" element={<InventarioPage />} /> 
+          <Route path="/inventario" element={<InventoryPage />} />
+          <Route path="/" element={<InventoryPage />} /> 
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
