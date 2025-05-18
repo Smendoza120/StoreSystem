@@ -1,13 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-
-interface Product {
-  id: string;
-  name: string;
-  unitPrice: number;
-  quantity: number;
-  storageLocation: string;
-  stockStatus: "good" | "low" | "out of stock";
-}
+import type { Product } from "../interfaces/inventory";
 
 interface InventoryResponse {
   data: Product[];

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -9,25 +9,54 @@ import {
   Paper,
   Button,
   IconButton,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-
-interface Product {
-  id: string;
-  name: string;
-  unitPrice: number;
-  quantity: number;
-  storageLocation: string;
-  stockStatus: "good" | "low" | "out of stock";
-}
+import type { Product } from "../../interfaces/inventory";
 
 interface ProductTableProps {
   products: Product[];
+  onOpenEdit: (product: Product) => void;
 }
 
-const ProductTable: React.FC<ProductTableProps> = ({ products }) => {
+const ProductTable: React.FC<ProductTableProps> = ({
+  products,
+  onOpenEdit,
+}) => {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const open = Boolean(anchorEl);
   const stockAlto = 10;
   const stockBajo = 5;
+
+  const handleClick = (
+    event: React.MouseEvent<HTMLButtonElement>,
+    product: Product
+  ) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedProduct(product);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+    setSelectedProduct(null);
+  };
+
+  const handleEdit = () => {
+    handleClose();
+    if (selectedProduct) {
+      onOpenEdit(selectedProduct);
+    }
+  };
+
+  const handleDelete = () => {
+    handleClose();
+    if (selectedProduct) {
+      console.log(`Eliminar producto con ID: ${selectedProduct.id}`);
+      // Aquí iría la lógica para eliminar el producto
+    }
+  };
 
   return (
     <TableContainer component={Paper}>
@@ -62,10 +91,10 @@ const ProductTable: React.FC<ProductTableProps> = ({ products }) => {
                   variant="outlined"
                   color={
                     product.quantity > stockAlto
-                      ? "success" // En stock
+                      ? "success"
                       : product.quantity > stockBajo
-                      ? "warning" // Stock bajo
-                      : "error" // Agotado
+                      ? "warning"
+                      : "error"
                   }
                 >
                   {product.quantity > stockAlto
@@ -76,9 +105,29 @@ const ProductTable: React.FC<ProductTableProps> = ({ products }) => {
                 </Button>
               </TableCell>
               <TableCell>
-                <IconButton aria-label="acciones">
+                <IconButton
+                  aria-label="acciones"
+                  onClick={(event) => handleClick(event, product)}
+                >
                   <MoreVertIcon />
                 </IconButton>
+                <Menu
+                  id={`menu-${product.id}`}
+                  anchorEl={anchorEl}
+                  open={open}
+                  onClose={handleClose}
+                  anchorOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                >
+                  <MenuItem onClick={handleEdit}>Editar</MenuItem>
+                  <MenuItem onClick={handleDelete}>Eliminar</MenuItem>
+                </Menu>
               </TableCell>
             </TableRow>
           ))}

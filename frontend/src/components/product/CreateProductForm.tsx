@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   TextField,
   Button,
@@ -10,22 +10,56 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
+import type { Product } from "../../interfaces/inventory";
 
 interface CreateProductFormProps {
   onClose: () => void;
-  onCreate: (newProduct: any) => void;
+  onCreate: (newProduct: Omit<Product, "id"> | Product) => void;
+  initialValues?: Product | null;
 }
 
 const CreateProductForm: React.FC<CreateProductFormProps> = ({
   onClose,
   onCreate,
+  initialValues,
 }) => {
-  const [name, setName] = useState("");
-  const [unitPrice, setUnitPrice] = useState<number | "">("");
-  const [quantity, setQuantity] = useState<number | "">("");
+  const [name, setName] = useState(initialValues?.name || "");
+  const [unitPrice, setUnitPrice] = useState<number | "">(
+    initialValues?.unitPrice || ""
+  );
+  const [quantity, setQuantity] = useState<number | "">(
+    initialValues?.quantity || ""
+  );
+
+  const getSafeStorageLocation = (
+    value: string | undefined
+  ): "in stock" | "in warehouse" => {
+    if (value === "in stock" || value === "in warehouse") {
+      return value;
+    }
+    return "in stock"; // Valor por defecto si no coincide
+  };
+
   const [storageLocation, setStorageLocation] = useState<
     "in stock" | "in warehouse"
-  >("in stock");
+  >(getSafeStorageLocation(initialValues?.storageLocation));
+  const [stockStatus, setStockStatus] = useState<Product['stockStatus']>(initialValues?.stockStatus || "good");
+
+  useEffect(() => {
+    if (initialValues) {
+      setName(initialValues.name || "");
+      setUnitPrice(initialValues.unitPrice || "");
+      setQuantity(initialValues.quantity || "");
+      setStorageLocation(getSafeStorageLocation(initialValues.storageLocation));
+      setStockStatus(initialValues.stockStatus || "good");
+    } else {
+      setName("");
+      setUnitPrice("");
+      setQuantity("");
+      setStorageLocation("in stock");
+      setStockStatus("good");
+    }
+  }, [initialValues]);
 
   const handleCreate = () => {
     const newProduct = {
@@ -33,13 +67,15 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
       unitPrice: Number(unitPrice),
       quantity: Number(quantity),
       storageLocation,
+      stockStatus,
+      ...(initialValues?.id && { id: initialValues.id }),
     };
     onCreate(newProduct);
     onClose();
   };
 
   const handleChangeStorage = (event: any) => {
-    setStorageLocation(event.target.value);
+    setStorageLocation(event.target.value as "in stock" | "in warehouse");
   };
 
   return (
