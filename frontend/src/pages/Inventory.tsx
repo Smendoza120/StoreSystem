@@ -4,17 +4,57 @@ import HeaderInventory from "../components/layout/HeaderInventory";
 import ActionBar from "../components/layout/ActionBar";
 import ProductTable from "../components/product/ProductTable";
 import Pagination from "../components/common/Pagination";
-import { Alert, Box, CircularProgress, Typography } from "@mui/material";
 import useInventory from "../hooks/useInventory";
+import {
+  Box,
+  Typography,
+  CircularProgress,
+  Alert,
+  Dialog,
+} from "@mui/material";
+import CreateProductForm from "../components/product/CreateProductForm";
 
 const InventarioPage: React.FC = () => {
   const [page, setPage] = useState(1);
-  const productsPerPage = 5; // Ajusta según necesites
-  const { inventoryData, loading, error, totalItems } = useInventory(
-    page,
-    productsPerPage
-  );
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [createProductError, setCreateProductError] = useState<string | null>(null);
+  const [createProductSuccess, setCreateProductSuccess] = useState<boolean>(false);
+  const productsPerPage = 5;
+  const { inventoryData, loading, error, totalItems, refetch: refetchInventory } = useInventory(page, productsPerPage);
   const totalPages = Math.ceil(totalItems / productsPerPage);
+
+  const handleOpenCreateDialog  = () => {
+    setIsCreateDialogOpen(true);
+  }
+
+  const handleCloseCreateDialog  = () => {
+    setIsCreateDialogOpen(false);
+    setCreateProductError(null);
+    setCreateProductSuccess(false);
+  }
+
+  const handleCreateProduct = async (newProduct: any) => {
+    try {
+      const response = await fetch('http://localhost:3000/api/inventory', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newProduct),
+      });
+
+      if (response.ok) {
+        setCreateProductSuccess(true);
+        refetchInventory(); // Recargar los datos del inventario
+        setTimeout(() => setCreateProductSuccess(false), 3000); // Limpiar el mensaje de éxito
+      } else {
+        const errorData = await response.json();
+        setCreateProductError(errorData.message || 'Error al crear el producto');
+      }
+    } catch (err: any) {
+      setCreateProductError(err.message || 'Error de conexión al crear el producto');
+    }
+  };
 
   const handleChangePage = (
     event: React.ChangeEvent<unknown>,
@@ -31,7 +71,14 @@ const InventarioPage: React.FC = () => {
       <Sidebar open={true} onClose={() => {}} />
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <HeaderInventory />
-        <ActionBar />
+        <ActionBar onOpenCreateDialog={handleOpenCreateDialog} />
+
+        {createProductSuccess && (
+          <Alert severity="success" sx={{ mb: 2 }}>Producto creado correctamente.</Alert>
+        )}
+        {createProductError && (
+          <Alert severity="error" sx={{ mb: 2 }}>{createProductError}</Alert>
+        )}
 
         {loading ? (
           <Box
@@ -68,6 +115,10 @@ const InventarioPage: React.FC = () => {
             </Box>
           </>
         )}
+
+        <Dialog open={isCreateDialogOpen} onClose={handleCloseCreateDialog} fullWidth maxWidth="sm">
+          <CreateProductForm onClose={handleCloseCreateDialog} onCreate={handleCreateProduct} />
+        </Dialog>
       </Box>
     </Box>
   );

@@ -4,7 +4,11 @@ import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from '@mui/icons-material/Add';
 import DownloadIcon from '@mui/icons-material/Download';
 
-const ActionBar: React.FC = () => {
+interface ActionBarProps {
+  onOpenCreateDialog: () => void;
+}
+
+const ActionBar: React.FC<ActionBarProps> = ({ onOpenCreateDialog }) => {
   return(
     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
       <TextField 
@@ -29,14 +33,13 @@ const ActionBar: React.FC = () => {
         <InputLabel id="status-label">Todos los estados</InputLabel>
         <Select labelId="status-label" id="status-select" value="">
           <MenuItem value="">Todos los estados</MenuItem>
-          {/* Aquí irían las opciones de estados */}
         </Select>
       </FormControl>
       
       <IconButton aria-label="descargar" style={{ marginRight: '16px' }}>
         <DownloadIcon />
       </IconButton>
-      <Button variant="contained" color="primary" startIcon={<AddIcon />}>
+      <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={onOpenCreateDialog}>
         Nuevo Producto
       </Button>
     </div>
