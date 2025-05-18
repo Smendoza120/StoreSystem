@@ -30,6 +30,12 @@
 5.  **Implementación de la API de Ventas:**
     * Definir las rutas para registrar nuevas ventas y consultar el historial de ventas.
     * Implementar la lógica en memoria para el registro y consulta de ventas.
+## Tareas
+    - [] Seleccionar producto y retirarlo del stock dependiendo la cantidad una vez se realice la compra
+    - [] 
+    - [] Historico de ventas
+
+
 6.  **Implementación de la API de Facturación:**
     * Definir las rutas para generar facturas a partir de los datos de venta.
     * Implementar la lógica para la creación de facturas (formato, cálculos, etc.).

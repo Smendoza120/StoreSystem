@@ -1,12 +1,10 @@
-import { v4 as uuidv4 } from "uuid";
-
-let inventory = [];
+export let inventory = [];
 
 const generateProductId = () => {
   return Math.random().toString(36).substring(2, 15);
 };
 
-const getStockStatus = (cantidad) => {
+export const getStockStatus = (cantidad) => {
   if (cantidad > 10) {
     return "bien";
   } else if (cantidad > 3) {
