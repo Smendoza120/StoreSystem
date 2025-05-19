@@ -18,7 +18,10 @@ router.post('/', inventoryController.addProduct);
 /**
  * @route GET /api/inventory
  * @group Inventory - Inventory management operations
- * @returns {array<object>} 200 - List of all products in the inventory.
+ * @param {integer} page.query - The page number to retrieve (default: 1).
+ * @param {integer} limit.query - The number of items to retrieve per page (default: 10).
+ * @returns {object} 200 - An object containing the list of products for the current page, total items, and total pages.
+ * @returns {Error}   400 - Invalid page or limit parameters.
  */
 router.get('/', inventoryController.getInventory);
 

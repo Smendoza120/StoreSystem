@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import type { Product } from "../interfaces/inventory";
 
 interface InventoryResponse {
-  data: Product[];
-  total: number;
+  products: Product[]; 
+  totalItems: number; 
 }
 
 const useInventory = (page: number = 1, limit: number = 10) => {
@@ -23,10 +23,10 @@ const useInventory = (page: number = 1, limit: number = 10) => {
         const message = `HTTP error! status: ${response.status}`;
         throw new Error(message);
       }
-      const data: Product[] = await response.json();
+      const data: InventoryResponse = await response.json(); // Espera la nueva estructura de la respuesta
       console.log("Datos recibidos de la API:", data);
-      setInventoryData(data);
-      setTotalItems(data.length);
+      setInventoryData(data.products); // Accede al array de productos desde la propiedad 'products'
+      setTotalItems(data.totalItems); // Accede al total de items desde la propiedad 'totalItems'
     } catch (err: Error | any) {
       console.error("Error al obtener el inventario:", err);
       setError(err.message || "Error fetching inventory");

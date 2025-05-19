@@ -66,7 +66,25 @@ export const addProduct = (req, res) => {
 };
 
 export const getInventory = (req, res) => {
-  return res.status(200).json(inventory);
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+
+  if (isNaN(page) || page < 1 || isNaN(limit) || limit < 1) {
+    return res.status(400).json({ message: "Invalid page or limit parameters." });
+  }
+
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
+  const totalItems = inventory.length;
+
+  const results = inventory.slice(startIndex, endIndex);
+
+  return res.status(200).json({
+    totalItems: totalItems,
+    totalPages: Math.ceil(totalItems / limit),
+    currentPage: page,
+    products: results,
+  });
 };
 
 export const getProductById = (req, res) => {

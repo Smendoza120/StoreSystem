@@ -12,6 +12,10 @@ import {
   Alert,
   Dialog,
   Snackbar,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import CreateProductForm from "../components/product/CreateProductForm";
 import type { Product } from "../interfaces/inventory";
@@ -20,6 +24,7 @@ import EditProductForm from "../components/product/EditProductForm";
 
 const InventoryPage: React.FC = () => {
   const [page, setPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [createProductError, setCreateProductError] = useState<string | null>(
     null
@@ -35,8 +40,9 @@ const InventoryPage: React.FC = () => {
     error,
     totalItems,
     refetch: refetchInventory,
-  } = useInventory(page, productsPerPage);
-  const totalPages = Math.ceil(totalItems / productsPerPage);
+  } = useInventory(page, itemsPerPage);
+
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   const handleOpenCreateDialog = () => {
     setIsCreateDialogOpen(true);
@@ -97,6 +103,11 @@ const InventoryPage: React.FC = () => {
     setPage(newPage);
   };
 
+  const handleChangeItemsPerPage = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setItemsPerPage(parseInt(event.target.value, 10));
+    setPage(1); 
+  };
+
   const handleCloseSnackbar = (
     event: React.SyntheticEvent | Event,
     reason?: string
@@ -123,7 +134,7 @@ const InventoryPage: React.FC = () => {
             autoHideDuration={3000}
             onClose={handleCloseSnackbar}
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-            message="Producto guardado correctamente" // Mensaje genérico para crear y editar
+            message="Producto guardado correctamente" 
           />
         )}
         {createProductError && (
@@ -159,6 +170,22 @@ const InventoryPage: React.FC = () => {
                 mt: 2,
               }}
             >
+              <FormControl sx={{ minWidth: 120 }}>
+                <InputLabel id="items-per-page-label">Mostrar</InputLabel>
+                <Select
+                  labelId="items-per-page-label"
+                  id="items-per-page"
+                  value={itemsPerPage}
+                  label="Mostrar"
+                  onChange={handleChangeItemsPerPage}
+                >
+                  <MenuItem value={5}>5</MenuItem>
+                  <MenuItem value={10}>10</MenuItem>
+                  <MenuItem value={25}>25</MenuItem>
+                  <MenuItem value={50}>50</MenuItem>
+                  {/* Puedes agregar más opciones */}
+                </Select>
+              </FormControl>
               <Typography variant="body2">
                 Mostrando {startIndex + 1}-{endIndex} de {totalItems} productos
               </Typography>
