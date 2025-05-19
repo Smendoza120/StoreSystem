@@ -45,6 +45,15 @@ router.get('/:id', inventoryController.getProductById);
 router.put('/:id', inventoryController.updateProduct);
 
 /**
+ * @route DELETE /api/inventory/{id}
+ * @group Inventory - Inventory management operations
+ * @param {string} id.path.required - ID of the product to delete.
+ * @returns {object} 200 - Product deleted successfully.
+ * @returns {Error}   404 - Product not found.
+ */
+router.delete('/:id', inventoryController.deleteProduct);
+
+/**
  * @route GET /api/inventory/search
  * @group Inventory - Inventory management operations
  * @param {string} name.query.required - Name of the product to search for.

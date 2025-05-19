@@ -15,6 +15,8 @@ import {
 } from "@mui/material";
 import CreateProductForm from "../components/product/CreateProductForm";
 import type { Product } from "../interfaces/inventory";
+import { createProduct, updateProduct } from "../services/inventoryService";
+import EditProductForm from "../components/product/EditProductForm";
 
 const InventoryPage: React.FC = () => {
   const [page, setPage] = useState(1);
@@ -43,7 +45,6 @@ const InventoryPage: React.FC = () => {
 
   const handleCloseCreateDialog = () => {
     setIsCreateDialogOpen(false);
-    setIsEditDialogOpen(false);
     setCreateProductError(null);
     setCreateProductSuccess(false);
     setProductToEdit(null);
@@ -54,26 +55,19 @@ const InventoryPage: React.FC = () => {
     setIsEditDialogOpen(true);
   };
 
-  const handleCreateProduct = async (newProduct: any) => {
-    try {
-      const response = await fetch("http://localhost:3000/api/inventory", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newProduct),
-      });
+  const handleCloseEditDialog = () => {
+    setIsEditDialogOpen(false);
+    setProductToEdit(null);
+    setCreateProductError(null);
+    setCreateProductSuccess(false);
+  };
 
-      if (response.ok) {
-        setCreateProductSuccess(true);
-        refetchInventory();
-        setTimeout(() => setCreateProductSuccess(false), 3000);
-      } else {
-        const errorData = await response.json();
-        setCreateProductError(
-          errorData.message || "Error al crear el producto"
-        );
-      }
+  const handleCreateProduct = async (newProduct: Omit<Product, "id">) => {
+    try {
+      await createProduct(newProduct);
+      setCreateProductSuccess(true);
+      refetchInventory();
+      setTimeout(() => setCreateProductSuccess(false), 3000);
     } catch (err: any) {
       setCreateProductError(
         err.message || "Error de conexión al crear el producto"
@@ -83,34 +77,16 @@ const InventoryPage: React.FC = () => {
 
   const handleUpdateProduct = async (updatedProduct: Product) => {
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/inventory/${updatedProduct.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(updatedProduct),
-        }
-      );
-
-      if (response.ok) {
-        setCreateProductSuccess(true);
-        refetchInventory();
-        setTimeout(() => setCreateProductSuccess(false), 3000);
-      } else {
-        const errorData = await response.json();
-        setCreateProductError(
-          errorData.message || "Error al actualizar el producto"
-        );
-      }
+      await updateProduct(updatedProduct);
+      setCreateProductSuccess(true);
+      refetchInventory();
+      setTimeout(() => setCreateProductSuccess(false), 3000);
     } catch (err: any) {
       setCreateProductError(
         err.message || "Error de conexión al actualizar el producto"
       );
     } finally {
-      setIsEditDialogOpen(false);
-      setProductToEdit(null);
+      handleCloseEditDialog();
     }
   };
 
@@ -151,7 +127,9 @@ const InventoryPage: React.FC = () => {
           />
         )}
         {createProductError && (
-          <Alert severity="error" sx={{ mb: 2 }}>{createProductError}</Alert>
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {createProductError}
+          </Alert>
         )}
 
         {loading ? (
@@ -193,17 +171,33 @@ const InventoryPage: React.FC = () => {
           </>
         )}
 
+        {/* Diálogo para la creación de productos */}
         <Dialog
-          open={isCreateDialogOpen || isEditDialogOpen}
+          open={isCreateDialogOpen}
           onClose={handleCloseCreateDialog}
           fullWidth
           maxWidth="sm"
         >
           <CreateProductForm
             onClose={handleCloseCreateDialog}
-            onCreate={productToEdit ? handleUpdateProduct : handleCreateProduct}
-            initialValues={productToEdit}
+            onCreate={handleCreateProduct}
           />
+        </Dialog>
+
+        {/* Diálogo para la edición de productos */}
+        <Dialog
+          open={isEditDialogOpen}
+          onClose={handleCloseEditDialog}
+          fullWidth
+          maxWidth="sm"
+        >
+          {productToEdit ? ( 
+            <EditProductForm
+              onClose={handleCloseEditDialog}
+              onUpdate={handleUpdateProduct}
+              initialValues={productToEdit}
+            />
+          ) : null}
         </Dialog>
       </Box>
     </Box>

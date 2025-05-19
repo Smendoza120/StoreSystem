@@ -135,3 +135,15 @@ export const updateProduct = (req, res) => {
     return res.status(404).json({ message: "Product not found." });
   }
 };
+
+export const deleteProduct = (req, res) => {
+  const { id } = req.params;
+  const initialLength = inventory.length;
+  inventory = inventory.filter((item) => item.id !== id);
+
+  if (inventory.length < initialLength) {
+    return res.status(200).json({ message: `Product with ID "${id}" deleted.` });
+  } else {
+    return res.status(404).json({ message: `Product with ID "${id}" not found.` });
+  }
+};

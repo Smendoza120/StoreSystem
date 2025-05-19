@@ -138,6 +138,32 @@
         description: Product not found.
     tags:
       - Inventory
+  delete: # Nueva definición para el endpoint DELETE
+    summary: Delete a product from the inventory by its ID.
+    description: Removes a specific product from the inventory based on its unique ID.
+    parameters:
+      - in: path
+        name: id
+        required: true
+        description: ID of the product to delete.
+        schema:
+          type: string
+          example: abc-123-xyz
+    responses:
+      '200':
+        description: Product deleted successfully.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Product with ID "abc-123-xyz" deleted.
+      '404':
+        description: Product not found.
+    tags:
+      - Inventory
 
 /api/inventory/search:
   get:
