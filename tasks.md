@@ -30,11 +30,6 @@
 5.  **Implementación de la API de Ventas:**
     * Definir las rutas para registrar nuevas ventas y consultar el historial de ventas.
     * Implementar la lógica en memoria para el registro y consulta de ventas.
-## Tareas
-    - [] eliminar producto
-    - [] Realizar paginacion por lado backend
-
-
 6.  **Implementación de la API de Facturación:**
     * Definir las rutas para generar facturas a partir de los datos de venta.
     * Implementar la lógica para la creación de facturas (formato, cálculos, etc.).
@@ -89,3 +84,16 @@
     * Configurar y desplegar la aplicación Express.js en un entorno de hosting.
 20. **Despliegue del Frontend:**
     * Construir la versión de producción de la aplicación React y desplegar los archivos estáticos en un servicio de hosting de sitios estáticos.
+
+# Tareas pendientes
+- [] Realizar las ventas diarias
+- [] Mejorar los Anys de todo el codigo
+- [] Corregir errores
+- [] Agregar validaciones a cada formulario
+- [] Cambiar los alert por snackbar en los mensajes para informar al usuario
+- [] Cuando se cree un usuario no saltar al listado de usaurios
+- [] Mejorar la informacion de la tabla de los usuarios
+- [] Crear usuarios de prueba para los instructores
+- [] Agregar productos predeterminados para las pruebas
+- [] Agregar la funcionalidad de edicion usuario
+- [] Agregar la funcionalidad de deshabilitar usuario
