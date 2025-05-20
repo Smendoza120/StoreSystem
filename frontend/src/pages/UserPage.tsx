@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Sidebar from '../components/layout/Sidebar';
 import HeaderUsers from '../components/layout/HeaderUsers';
 import UserTable from '../components/user/UserTable';
 import Pagination from '../components/common/Pagination';
@@ -46,7 +45,6 @@ const UserPage: React.FC = () => {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <Sidebar open={true} onClose={() => {}} />
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <HeaderUsers totalUsuarios={totalUsers} />
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>

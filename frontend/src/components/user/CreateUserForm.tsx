@@ -200,7 +200,6 @@ const CreateUserForm: React.FC<UserFormProps> = () => {
             <MenuItem value="Gerente">Gerente</MenuItem>
             <MenuItem value="Vendedor">Vendedor</MenuItem>
             <MenuItem value="Inventario">Inventario</MenuItem>
-            {/* Aquí irían las opciones de roles dinámicas */}
           </Select>
         </FormControl>
         <FormControl fullWidth margin="normal">

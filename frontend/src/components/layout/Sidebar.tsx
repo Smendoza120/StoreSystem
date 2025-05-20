@@ -1,61 +1,117 @@
 import React from "react";
-import { Drawer, List, ListItem, ListItemIcon, ListItemText, Divider } from "@mui/material";
-import DashboardIcon from "@mui/icons-material/Dashboard";
+import {
+  Drawer,
+  List,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  ListItemButton,
+  ListItem,
+} from "@mui/material";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import PeopleIcon from "@mui/icons-material/People";
-import LogoutIcon from '@mui/icons-material/Logout';
-import StorefrontIcon from '@mui/icons-material/Storefront';
+import LogoutIcon from "@mui/icons-material/Logout";
+import LocalGroceryStoreIcon from "@mui/icons-material/LocalGroceryStore";
+import type { SidebarProps } from "../../interfaces/Sidebar";
+import { useLocation, Link } from "react-router-dom";
 
-interface SidebarProps {
-  open: boolean;
-  onClose: () => void;
-}
+const Sidebar: React.FC<SidebarProps> = ({ open, onClose, width }) => {
+  const location = useLocation();
 
-const Sidebar: React.FC<SidebarProps> = ({open, onClose}) =>{
   return (
-    <Drawer open={open} onClose={onClose} variant="permanent">
-      <List>
-        <ListItem>
-          <ListItemIcon>
-            <StorefrontIcon />
-          </ListItemIcon>
-          <ListItemText primary="StoreSystem" />
-        </ListItem>
+    <Drawer
+      open={open}
+      onClose={onClose}
+      variant="permanent"
+      sx={{ width: width, "& .MuiDrawer-paper": { width: width } }}
+    >
+      <List sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <div>
+          <ListItem key="store" disablePadding>
+            <ListItemText primary="StoreSystem" sx={{ pl: 2 }} />
+          </ListItem>
 
-        <Divider />
+          <Divider />
 
-        <ListItem>
-          <ListItemIcon>
-            <InventoryIcon />
-          </ListItemIcon>
-          <ListItemText primary="Dashboard" />
-        </ListItem>
+          <ListItem key="users" disablePadding>
+            <Link
+              to="/users"
+              style={{
+                textDecoration: "none",
+                color: "inherit",
+                width: "100%",
+              }}
+            >
+              <ListItemButton selected={location.pathname.startsWith("/users")}>
+                <ListItemIcon>
+                  <PeopleIcon />
+                </ListItemIcon>
+                <ListItemText primary="Usuarios" />
+              </ListItemButton>
+            </Link>
+          </ListItem>
 
-        <ListItem>
-          <ListItemIcon>
-            <DashboardIcon />
-          </ListItemIcon>
-          <ListItemText primary="Dashboard" />
-        </ListItem>
+          <ListItem key="inventory" disablePadding>
+            <Link
+              to="/inventory"
+              style={{
+                textDecoration: "none",
+                color: "inherit",
+                width: "100%",
+              }}
+            >
+              <ListItemButton selected={location.pathname === "/inventory"}>
+                <ListItemIcon>
+                  <InventoryIcon />
+                </ListItemIcon>
+                <ListItemText primary="Inventario" />
+              </ListItemButton>
+            </Link>
+          </ListItem>
 
-        <ListItem>
-          <ListItemIcon>
-            <PeopleIcon />
-          </ListItemIcon>
-          <ListItemText primary="Usuarios" />
-        </ListItem>
+          <ListItem key="daily-sales" disablePadding>
+            <Link
+              to="/daily-sales"
+              style={{
+                textDecoration: "none",
+                color: "inherit",
+                width: "100%",
+              }}
+            >
+              <ListItemButton selected={location.pathname === "/daily-sales"}>
+                <ListItemIcon>
+                  <LocalGroceryStoreIcon />
+                </ListItemIcon>
+                <ListItemText primary="Ventas Diarias" />
+              </ListItemButton>
+            </Link>
+          </ListItem>
+        </div>
 
-        <Divider />
+        <div style={{ marginTop: 'auto' }}>
+          <Divider />
 
-        <ListItem>
-          <ListItemIcon>
-            <LogoutIcon />
-          </ListItemIcon>
-          <ListItemText primary="Cerrar sesión" />
-        </ListItem>
+          <ListItem key="logout" disablePadding>
+            <Link
+              to="/login"
+              style={{
+                textDecoration: "none",
+                color: "inherit",
+                width: "100%",
+              }}
+            >
+              <ListItemButton selected={location.pathname === "/login"}>
+                <ListItemIcon>
+                  <LogoutIcon />
+                </ListItemIcon>
+                <ListItemText primary="Cerrar sesión" />
+              </ListItemButton>
+            </Link>
+          </ListItem>
+        </div>
       </List>
     </Drawer>
-  )
-}
+  );
+};
 
 export default Sidebar;

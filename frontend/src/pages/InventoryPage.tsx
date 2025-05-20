@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import Sidebar from "../components/layout/Sidebar";
 import HeaderInventory from "../components/layout/HeaderInventory";
 import ActionBar from "../components/layout/ActionBar";
 import ProductTable from "../components/product/ProductTable";
@@ -123,7 +122,6 @@ const InventoryPage: React.FC = () => {
 
   return (
     <Box sx={{ display: "flex" }}>
-      <Sidebar open={true} onClose={() => {}} />
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <HeaderInventory />
         <ActionBar onOpenCreateDialog={handleOpenCreateDialog} />
