@@ -132,50 +132,63 @@ const UserPage: React.FC = () => {
         <HeaderUsers totalUsuarios={totalUsers} />
         {!isCreatingUser ? (
           <>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                mb: 2,
-              }}
-            >
-              <TextField
-                label="Buscar usuarios..."
-                variant="outlined"
-                size="small"
-                InputProps={{
-                  startAdornment: <SearchIcon />,
+            <div className="pt-4">
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  mb: 2,
                 }}
-              />
-              <Box>
-                <FormControl size="small" sx={{ mr: 2 }}>
-                  <InputLabel id="roles-label">Todos los roles</InputLabel>
-                  <Select labelId="roles-label" id="roles-select" value="">
-                    <MenuItem value="">Todos los roles</MenuItem>
-                  </Select>
-                </FormControl>
-                <FormControl size="small" sx={{ mr: 2 }}>
-                  <InputLabel id="estados-label">Todos los estados</InputLabel>
-                  <Select labelId="estados-label" id="estados-select" value="">
-                    <MenuItem value="">Todos los estados</MenuItem>
-                    <MenuItem value="Activo">Activo</MenuItem>
-                    <MenuItem value="Inactivo">Inactivo</MenuItem>
-                  </Select>
-                </FormControl>
-                <IconButton aria-label="descargar" sx={{ mr: 2 }}>
-                  <DownloadIcon />
-                </IconButton>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  startIcon={<AddIcon />}
-                  onClick={handleNuevoUsuarioClick}
-                >
-                  Nuevo Usuario
-                </Button>
+              >
+                <TextField
+                  label="Buscar usuarios..."
+                  variant="outlined"
+                  size="small"
+                  InputProps={{
+                    startAdornment: <SearchIcon />,
+                  }}
+                />
+                <Box>
+                  <FormControl
+                    size="small"
+                    sx={{ mr: 2 }}
+                    className="w-[150px]"
+                  >
+                    <InputLabel id="roles-label">Todos los roles</InputLabel>
+                    <Select labelId="roles-label" id="roles-select" value="">
+                      <MenuItem value="">Todos los roles</MenuItem>
+                    </Select>
+                  </FormControl>
+                  <FormControl
+                    size="small"
+                    sx={{ mr: 2 }}
+                    className="w-[180px]"
+                  >
+                    <InputLabel id="estados-label">
+                      Todos los estados
+                    </InputLabel>
+                    <Select
+                      labelId="estados-label"
+                      id="estados-select"
+                      value=""
+                    >
+                      <MenuItem value="">Todos los estados</MenuItem>
+                      <MenuItem value="Activo">Activo</MenuItem>
+                      <MenuItem value="Inactivo">Inactivo</MenuItem>
+                    </Select>
+                  </FormControl>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<AddIcon />}
+                    onClick={handleNuevoUsuarioClick}
+                  >
+                    Nuevo Usuario
+                  </Button>
+                </Box>
               </Box>
-            </Box>
+            </div>
             <UserTable
               users={currentUsers}
               onUserStatusChange={handleUserActionComplete}
