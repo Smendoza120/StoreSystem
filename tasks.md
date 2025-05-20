@@ -87,6 +87,9 @@
 
 # Tareas pendientes
 - [] Realizar las ventas diarias
+- [] Realizar la tabla con las ventas diarias
+- [] Realizar la generacion de facturas en la venta y en la tabla
+- [] Agregar los permisos con el token de sesion
 - [] Mejorar los Anys de todo el codigo
 - [] Corregir errores
 - [] Agregar validaciones a cada formulario
@@ -97,3 +100,4 @@
 - [] Agregar productos predeterminados para las pruebas
 - [] Agregar la funcionalidad de edicion usuario
 - [] Agregar la funcionalidad de deshabilitar usuario
+- [] Realizar la reactividad de la tabla de usuarios
