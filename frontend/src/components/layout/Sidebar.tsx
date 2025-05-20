@@ -28,7 +28,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, width }) => {
       <List sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <div>
           <ListItem key="store" disablePadding>
-            <ListItemText primary="StoreSystem" sx={{ pl: 2 }} />
+            <ListItemText primary="StoreSystem" sx={{ pl: 2 }} className="text-red-600 text-3xl"/>
           </ListItem>
 
           <Divider />
