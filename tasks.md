@@ -86,6 +86,8 @@
     * Construir la versión de producción de la aplicación React y desplegar los archivos estáticos en un servicio de hosting de sitios estáticos.
 
 # Tareas pendientes
+- [] Agregar lista de categorias y estados para el filtro
+- [] Hacer el filtro en la parte front
 - [] Realizar las ventas diarias
 - [] Realizar la tabla con las ventas diarias
 - [] Realizar la generacion de facturas en la venta y en la tabla
