@@ -30,12 +30,12 @@ export interface UserData {
 }
 
 export interface UserDataTable {
-  id?: string;
+  id: string;
   fullName: string;
   email: string;
   password: string;
   roles: string[];
-  username?: string;
+  username: string;
   isEnabled: boolean;
   permissions: {
     control_usuarios: {
@@ -63,6 +63,7 @@ export interface UserDataTable {
 
 export interface UserTableProps {
   users: UserDataTable[];
+  onUserStatusChange?: () => void; // Añade esta prop
 }
 
 export interface UserFormProps {
