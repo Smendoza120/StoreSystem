@@ -1,33 +1,45 @@
 import React, { useState } from 'react';
-import { TextField, Button, Box } from '@mui/material';
+import { TextField, Button, Box, Alert } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { loginUser } from '../../services/loginService';
 
-interface LoginFormProps {}
+const LoginForm: React.FC = () => {
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-const LoginForm: React.FC<LoginFormProps> = () => {
-  const [usuario, setUsuario] = useState('');
-  const [contrasena, setContrasena] = useState('');
-
-  const handleUsuarioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setUsuario(event.target.value);
+  const handleIdentifierChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setIdentifier(event.target.value);
   };
 
-  const handleContrasenaChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setContrasena(event.target.value);
+  const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(event.target.value);
   };
 
   const handleCancelar = () => {
-    // Lógica para cancelar el inicio de sesión (ej: limpiar campos, redirigir)
     console.log('Cancelar');
-    setUsuario('');
-    setContrasena('');
+    setIdentifier('');
+    setPassword('');
+    setError(null);
   };
 
-  const handleIngresar = () => {
-    // Lógica para enviar los datos de inicio de sesión
-    console.log('Ingresar', { usuario, contrasena });
-    // Aquí iría la llamada a la API de autenticación
+  const handleIngresar = async () => {
+    setError(null);
+    setLoading(true);
+
+    try {
+      const response = await loginUser({ identifier, password });
+      console.log('Inicio de sesión exitoso:', response);
+      localStorage.setItem('jwtToken', response.jwt);
+      window.location.href = '/'; 
+    } catch (error: any) {
+      console.error('Error al iniciar sesión:', error);
+      setError(error.message || 'Error al iniciar sesión. Por favor, inténtalo de nuevo.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -36,25 +48,25 @@ const LoginForm: React.FC<LoginFormProps> = () => {
         margin="normal"
         required
         fullWidth
-        id="usuario"
-        label="Usuario"
-        name="usuario"
-        autoComplete="usuario"
+        id="identifier"
+        label="Usuario o Correo Electrónico"
+        name="identifier"
+        autoComplete="identifier"
         autoFocus
-        value={usuario}
-        onChange={handleUsuarioChange}
+        value={identifier}
+        onChange={handleIdentifierChange}
       />
       <TextField
         margin="normal"
         required
         fullWidth
-        name="contrasena"
+        name="password"
         label="Contraseña"
         type="password"
-        id="contrasena"
+        id="password"
         autoComplete="current-password"
-        value={contrasena}
-        onChange={handleContrasenaChange}
+        value={password}
+        onChange={handlePasswordChange}
       />
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
         <Button
@@ -69,10 +81,16 @@ const LoginForm: React.FC<LoginFormProps> = () => {
           variant="contained"
           endIcon={<ArrowForwardIcon />}
           onClick={handleIngresar}
+          disabled={loading}
         >
-          Ingresar
+          {loading ? 'Ingresando...' : 'Ingresar'}
         </Button>
       </Box>
+      {error && (
+        <Alert severity="error" sx={{ mt: 2 }}>
+          {error}
+        </Alert>
+      )}
     </Box>
   );
 };
