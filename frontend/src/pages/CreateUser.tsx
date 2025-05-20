@@ -8,7 +8,7 @@ const CreateUserPage: React.FC = () => {
     <Box sx={{ display: 'flex' }} className="border border-red-600">
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <PageHeader title="Creación de Usuario" subtitle="Ingrese los datos del nuevo usuario" />
-        <UserForm />
+        <UserForm onCancel={() => {}} onUserCreated={() => {}} />
       </Box>
     </Box>
   );
