@@ -18,7 +18,7 @@ import {
   type SelectChangeEvent,
 } from "@mui/material";
 import type { Product } from "../interfaces/inventory";
-import { createProduct, updateProduct } from "../services/inventoryService";
+import { createProduct, deleteProduct, updateProduct } from "../services/inventoryService";
 import CreateProductForm from "../components/inventory/CreateProductForm";
 import EditProductForm from "../components/inventory/EditProductForm";
 
@@ -118,6 +118,29 @@ const InventoryPage: React.FC = () => {
     }
   };
 
+  const handleDeleteProduct = async (id: string) => {
+    try {
+      const response = await deleteProduct(id, token);
+      if (response.success) {
+        setApiSuccessMessage(
+          response.message || "Producto eliminado exitosamente."
+        );
+        refetchInventory(); // Volver a cargar la lista después de la eliminación
+        handleCloseEditDialog(); // Cerrar el diálogo de edición
+      } else {
+        setApiError(response.message || "Error al eliminar el producto.");
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setApiError(
+          err.message || "Error de conexión al eliminar el producto."
+        );
+      } else {
+        setApiError("Ocurrió un error inesperado al eliminar el producto.");
+      }
+    }
+  };
+
   const handleChangePage = (
     event: React.ChangeEvent<unknown>,
     newPage: number
@@ -204,7 +227,6 @@ const InventoryPage: React.FC = () => {
                   <MenuItem value={10}>10</MenuItem>
                   <MenuItem value={25}>25</MenuItem>
                   <MenuItem value={50}>50</MenuItem>
-                  {/* Puedes agregar más opciones */}
                 </Select>
               </FormControl>
               <Typography variant="body2">
@@ -242,6 +264,7 @@ const InventoryPage: React.FC = () => {
               onClose={handleCloseEditDialog}
               onUpdate={handleUpdateProduct}
               initialValues={productToEdit}
+              onDelete={handleDeleteProduct}
             />
           ) : null}
         </Dialog>

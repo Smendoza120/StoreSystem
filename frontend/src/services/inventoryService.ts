@@ -1,4 +1,6 @@
 import type {
+  DeleteProductResponse,
+  PaginatedProductsData,
   Product,
   ProductApiResponse,
   ProductSingleResponse,
@@ -17,7 +19,7 @@ export const createProduct = async (
   newProduct: Omit<Product, "id">,
   token?: string
 ): Promise<ProductSingleResponse> => {
-  return apiClient<ProductSingleResponse>("/inventory", {
+  return apiClient<Product>("/inventory", {
     method: "POST",
     body: JSON.stringify(newProduct),
     token: token || undefined,
@@ -36,7 +38,7 @@ export const updateProduct = async (
   updatedProduct: Product,
   token: string
 ): Promise<ProductSingleResponse> => {
-  return apiClient<ProductSingleResponse>(`/inventory/${updatedProduct.id}`, {
+  return apiClient<Product>(`/inventory/${updatedProduct.id}`, {
     method: "PUT",
     body: JSON.stringify(updatedProduct),
     token: token || undefined,
@@ -53,7 +55,7 @@ export const updateProduct = async (
 export const getAllInventoryProducts = async (
   token: string
 ): Promise<ProductApiResponse> => {
-  return apiClient<ProductApiResponse>("/inventory", { token });
+  return apiClient<PaginatedProductsData>("/inventory", { token });
 };
 
 /**
@@ -69,8 +71,18 @@ export const searchProductsByName = async (
   token: string
 ): Promise<ProductApiResponse> => {
   const encodedSearchTerm = encodeURIComponent(searchTerm);
-  return apiClient<ProductApiResponse>(
+  return apiClient<PaginatedProductsData>(
     `/inventory/search?name=${encodedSearchTerm}`,
     { token }
   );
+};
+
+export const deleteProduct = async (
+  id: string,
+  token?: string
+): Promise<DeleteProductResponse> => {
+  return apiClient<null>(`/inventory/${id}`, {
+    method: "DELETE",
+    token: token || undefined,
+  });
 };

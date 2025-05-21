@@ -1,5 +1,20 @@
 interface RequestOptions extends RequestInit {
   token?: string;
+  body?: string | null | undefined;
+}
+
+/**
+ * @interface ApiResponse
+ * @description Interfaz genérica para la estructura estándar de una respuesta exitosa de la API.
+ * Todas las respuestas exitosas de la API deberían ajustarse a esto.
+ */
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+  totalItems?: number;
+  totalPages?: number;
+  currentPage?: number;
 }
 
 /**
@@ -9,7 +24,7 @@ interface RequestOptions extends RequestInit {
 interface ApiResponseError {
   success: false;
   message: string;
-  errors?: string[]; // Propiedad opcional para un array de errores detallados
+  errors?: string[];
 }
 
 /**
@@ -24,7 +39,7 @@ interface ApiResponseError {
 export async function apiClient<T>(
   endpoint: string,
   options?: RequestOptions
-): Promise<T> {
+): Promise<ApiResponse<T>> {
   const API_BASE_URL =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
@@ -79,7 +94,8 @@ export async function apiClient<T>(
     if (
       errorContent &&
       typeof errorContent === "object" &&
-      errorContent.message
+      "message" in errorContent &&
+      typeof errorContent.message === "string"
     ) {
       throw new Error(errorContent.message);
     } else if (typeof errorContent === "string") {
@@ -92,8 +108,27 @@ export async function apiClient<T>(
   }
 
   if (response.status === 204) {
-    return null as T;
+    return {
+      success: true,
+      message: "Operación exitosa (Sin contenido)",
+      data: null as T,
+    };
   }
 
-  return response.json() as Promise<T>;
+  const result = await response.json();
+
+  if (
+    result &&
+    typeof result === "object" &&
+    "success" in result &&
+    "data" in result
+  ) {
+    return result as ApiResponse<T>;
+  } else {
+    return {
+      success: true,
+      message: "Operación exitosa",
+      data: result as T,
+    };
+  }
 }

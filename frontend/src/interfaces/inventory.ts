@@ -48,3 +48,14 @@ export interface ProductSingleResponse {
   message: string;
   data: Product; 
 }
+
+/**
+ * @interface DeleteProductResponse
+ * @description Interfaz para la respuesta estándar de la API cuando se elimina un producto.
+ * Asume que devuelve éxito, un mensaje, y la 'data' es null o un objeto vacío tras la eliminación.
+ */
+export interface DeleteProductResponse {
+  success: boolean;
+  message: string;
+  data: null; // O 'data?: Product | null;' si la API a veces devuelve el producto, a veces no.
+}

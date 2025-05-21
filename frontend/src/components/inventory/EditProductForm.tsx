@@ -9,18 +9,22 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Box,
 } from "@mui/material";
+import type { SelectChangeEvent } from "@mui/material";
 import type { Product } from "../../interfaces/inventory";
 
 interface EditProductFormProps {
   onClose: () => void;
   onUpdate: (updatedProduct: Product) => void;
+  onDelete: (id: string) => void;
   initialValues: Product;
 }
 
 const EditProductForm: React.FC<EditProductFormProps> = ({
   onClose,
   onUpdate,
+  onDelete,
   initialValues,
 }) => {
   const [name, setName] = useState(initialValues.name);
@@ -29,8 +33,8 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
   );
   const [quantity, setQuantity] = useState<number | "">(initialValues.quantity);
   const [storageLocation, setStorageLocation] = useState<
-    "in stock" | "in warehouse"
-  >(initialValues.storageLocation as "in stock" | "in warehouse");
+    Product["storageLocation"]
+  >(initialValues.storageLocation);
   const [stockStatus, setStockStatus] = useState<Product["stockStatus"]>(
     initialValues.stockStatus
   );
@@ -48,12 +52,20 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
     onClose();
   };
 
-  const handleChangeStorage = (event: any) => {
-    setStorageLocation(event.target.value as "in stock" | "in warehouse");
+  const handleChangeStorage = (event: SelectChangeEvent<Product["storageLocation"]>) => {
+    setStorageLocation(event.target.value as Product["storageLocation"]);
   };
 
-  const handleChangeStockStatus = (event: any) => {
+  const handleChangeStockStatus = (event: SelectChangeEvent<Product["stockStatus"]>) => {
     setStockStatus(event.target.value as Product["stockStatus"]);
+  };
+
+  const handleConfirmDelete = () => {
+    if (initialValues.id) {
+      onDelete(initialValues.id);
+    } else {
+      console.error("Error: No se puede eliminar un producto sin ID.");
+    }
   };
 
   return (
@@ -125,11 +137,28 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
           </Select>
         </FormControl>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancelar</Button>
-        <Button onClick={handleEdit} color="primary">
-          Guardar Cambios
+      <DialogActions sx={{ justifyContent: "space-between", p: 3 }}>
+        <Button
+          onClick={handleConfirmDelete}
+          color="error"
+          variant="outlined"
+          sx={{ mr: 2 }}
+        >
+          Eliminar
         </Button>
+        <Box>
+          <Button
+            onClick={onClose}
+            color="primary"
+            variant="outlined"
+            sx={{ mr: 1 }}
+          >
+            Cancelar
+          </Button>
+          <Button onClick={handleEdit} color="primary" variant="contained">
+            Guardar Cambios
+          </Button>
+        </Box>
       </DialogActions>
     </>
   );

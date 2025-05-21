@@ -48,14 +48,6 @@ const ProductTable: React.FC<ProductTableProps> = ({
     }
   };
 
-  const handleDelete = () => {
-    handleClose();
-    if (selectedProduct) {
-      console.log(`Eliminar producto con ID: ${selectedProduct.id}`);
-      // Aquí iría la lógica para eliminar el producto
-    }
-  };
-
   const getStockStatusColor = (status: Product["stockStatus"]) => {
     switch (status) {
       case "bien":
@@ -149,7 +141,6 @@ const ProductTable: React.FC<ProductTableProps> = ({
                   }}
                 >
                   <MenuItem onClick={handleEdit}>Editar</MenuItem>
-                  <MenuItem onClick={handleDelete}>Eliminar</MenuItem>
                 </Menu>
               </TableCell>
             </TableRow>
