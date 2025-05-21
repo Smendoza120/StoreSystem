@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import type { Product, ProductApiResponse } from "../interfaces/inventory";
+import type { PaginatedProductsData, Product } from "../interfaces/inventory";
 import { apiClient } from "../utils/apiClient";
 
 const useInventory = (page: number = 1, limit: number = 10, token: string) => {
@@ -12,15 +12,10 @@ const useInventory = (page: number = 1, limit: number = 10, token: string) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await apiClient<ProductApiResponse>(
+      const response = await apiClient<PaginatedProductsData>(
         `/inventory?page=${page}&limit=${limit}`,
         token ? { token } : {}
       );
-
-      console.log("Respuesta COMPLETA de la API en useInventory:", response);
-      console.log("Contenido de response.data:", response.data);
-      console.log("Tipo de response.data:", typeof response.data);
-      console.log("¿Es response.data un array?", Array.isArray(response.data));
 
       if (response.success) {
         setInventoryData(response.data.products);
@@ -43,23 +38,8 @@ const useInventory = (page: number = 1, limit: number = 10, token: string) => {
   }, [page, limit, token]);
 
   useEffect(() => {
-    // COMENTADO: Eliminamos la lógica de verificación del token
-    // if (token) {
     fetchInventory();
-    // } else {
-    //   setLoading(false);
-    //   if (inventoryData.length === 0 && !error) {
-    //     setError("Token de autenticación no disponible.");
-    //   }
-    // }
-  }, [fetchInventory]); // 'token' ya no es una dependencia para que no re-ejecute al cambiar
-  // Si refetchInventory depende de token, entonces quizás sí deba ir.
-  // Mejor: 'fetchInventory' ya tiene 'token' en sus dependencias de useCallback.
-  // Por lo tanto, 'useEffect' solo necesita 'fetchInventory'.
-
-  // const refetch = useCallback(() => {
-  //   fetchInventory();
-  // }, [fetchInventory]);
+  }, [fetchInventory]);
 
   const refetch = useCallback(() => {
     fetchInventory();
