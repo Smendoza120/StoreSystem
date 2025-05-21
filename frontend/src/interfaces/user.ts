@@ -3,8 +3,8 @@ export interface UserData {
   email: string;
   password: string;
   roles: string[];
-  isEnabled?: boolean;
-  username?: string;
+  isEnabled?: boolean; 
+  username?: string; 
   permissions: {
     control_usuarios: {
       read: boolean;
@@ -33,7 +33,6 @@ export interface UserDataTable {
   id: string;
   fullName: string;
   email: string;
-  password: string;
   roles: string[];
   username: string;
   isEnabled: boolean;
@@ -53,7 +52,7 @@ export interface UserDataTable {
       write: boolean;
       delete: boolean;
     };
-    reportes: {
+    reportes?: {
       read: boolean;
       write: boolean;
       delete: boolean;
@@ -61,9 +60,14 @@ export interface UserDataTable {
   };
 }
 
+export interface CreateUserResponseData {
+  id: string;
+  username: string;
+}
+
 export interface UserTableProps {
   users: UserDataTable[];
-  onUserStatusChange?: () => void; // Añade esta prop
+  onUserStatusChange?: () => void;
 }
 
 export interface UserFormProps {

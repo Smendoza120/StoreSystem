@@ -5,37 +5,67 @@ import Pagination from "../components/common/Pagination";
 import { Box, Typography, CircularProgress, Alert } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
-import DownloadIcon from "@mui/icons-material/Download";
 import {
   TextField,
   Select,
   MenuItem,
   FormControl,
   InputLabel,
-  IconButton,
   Button,
 } from "@mui/material";
 import CreateUserForm from "../components/user/CreateUserForm";
 import type { UserDataTable } from "../interfaces/user";
 import { getAllUsers } from "../services/userService";
+import type { ApiResponse } from "../utils/apiClient";
 
-const transformUserDataToUserTable = (data: any): UserDataTable => {
+const transformUserDataToUserTable = (data: {
+  id?: string;
+  _id?: string;
+  fullName?: string;
+  username?: string;
+  email?: string;
+  password?: string; 
+  roles?: string[];
+  isEnabled?: boolean;
+  permissions?: {
+    control_usuarios?: { read?: boolean; write?: boolean; delete?: boolean };
+    inventario?: { read?: boolean; write?: boolean; delete?: boolean };
+    ventas_diarias?: { read?: boolean; write?: boolean; delete?: boolean };
+    reportes?: { read?: boolean; write?: boolean; delete?: boolean }; // Agrega reportes si está en tu interfaz
+  };
+}): UserDataTable => {
   return {
     id:
       data.id ||
       data._id ||
-      "temp-id-" + Math.random().toString(36).substr(2, 9),
+      "temp-id-" + Math.random().toString(36).substring(2, 9),
     fullName: data.fullName || "",
     username: data.username || "",
     email: data.email || "",
-    password: data.password || "",
+    // password: data.password || "", 
     roles: data.roles || [],
-    isEnabled: data.isEnabled ?? true,
-    permissions: data.permissions || {
-      control_usuarios: { read: false, write: false, delete: false },
-      inventario: { read: false, write: false, delete: false },
-      ventas_diarias: { read: false, write: false, delete: false },
-      // Se elimina el módulo de reportes
+    isEnabled: data.isEnabled ?? true, 
+    permissions: {
+      control_usuarios: {
+        read: data.permissions?.control_usuarios?.read || false,
+        write: data.permissions?.control_usuarios?.write || false,
+        delete: data.permissions?.control_usuarios?.delete || false,
+      },
+      inventario: {
+        read: data.permissions?.inventario?.read || false,
+        write: data.permissions?.inventario?.write || false,
+        delete: data.permissions?.inventario?.delete || false,
+      },
+      ventas_diarias: {
+        read: data.permissions?.ventas_diarias?.read || false,
+        write: data.permissions?.ventas_diarias?.write || false,
+        delete: data.permissions?.ventas_diarias?.delete || false,
+      },
+      reportes: {
+        read: data.permissions?.reportes?.read || false,
+        write: data.permissions?.reportes?.write || false,
+        delete: data.permissions?.reportes?.delete || false,
+      },
     },
   };
 };
@@ -55,11 +85,32 @@ const UserPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const usersFromApi = await getAllUsers();
-      const transformedUsers = usersFromApi.map(transformUserDataToUserTable);
-      setUsersData(transformedUsers);
-    } catch (err: any) {
-      setError(err.message || "Error al cargar los usuarios.");
+      const apiResponse: ApiResponse<UserDataTable[]> = await getAllUsers();
+
+      if (apiResponse.success) {
+        if (Array.isArray(apiResponse.data)) {
+          const transformedUsers: UserDataTable[] = apiResponse.data.map(
+            (userItem) => transformUserDataToUserTable(userItem)
+          );
+          setUsersData(transformedUsers);
+        } else {
+          setError(
+            "La respuesta de la API no contiene un array de usuarios en la propiedad 'data'."
+          );
+          setUsersData([]);
+        }
+      } else {
+        setError(apiResponse.message || "Error al cargar los usuarios.");
+        setUsersData([]); 
+      }
+    } catch (err: unknown) {
+      console.error("Error al cargar los usuarios:", err);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Ocurrió un error desconocido al cargar los usuarios.");
+      }
+      setUsersData([]); 
     } finally {
       setLoading(false);
     }
@@ -82,7 +133,7 @@ const UserPage: React.FC = () => {
 
   const handleUserActionComplete = () => {
     setIsCreatingUser(false);
-    fetchUsers();
+    fetchUsers(); 
   };
 
   const handleCreacionCancelada = () => {
