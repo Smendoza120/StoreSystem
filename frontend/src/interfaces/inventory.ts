@@ -6,3 +6,11 @@ export interface Product {
   storageLocation: string;
   stockStatus: "good" | "low" | "out of stock" | "bien" | "bajo" | "agotado";
 }
+
+export interface GetInventoryProductResponse {
+  id: string; 
+  name: string;
+  price: number;
+  stock: number;
+  
+}
