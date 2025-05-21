@@ -1,102 +1,76 @@
-import type { Product } from "../interfaces/inventory";
-import type { GetInventoryProductResponse } from "./salesService";
-
-const API_URL = "http://localhost:3000/api/inventory";
-
-export const createProduct = async (
-  newProduct: Omit<Product, "id">
-): Promise<Product> => {
-  const response = await fetch(API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(newProduct),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Error al crear el producto");
-  }
-
-  return await response.json();
-};
-
-export const updateProduct = async (
-  updatedProduct: Product
-): Promise<Product> => {
-  const response = await fetch(`${API_URL}/${updatedProduct.id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(updatedProduct),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Error al actualizar el producto");
-  }
-
-  return await response.json();
-};
+import type {
+  Product,
+  ProductApiResponse,
+  ProductSingleResponse,
+} from "../interfaces/inventory";
+import { apiClient } from "../utils/apiClient";
 
 /**
- * Obtiene todos los productos del inventario desde la API.
- * La API: GET /api/inventory
- * @returns {Promise<GetInventoryProductResponse[]>} Una promesa que resuelve con un array de productos.
+ * @function createProduct
+ * @description Crea un nuevo producto en el inventario.
+ * @param {Omit<Product, "id">} newProduct - Los datos del nuevo producto sin el ID.
+ * @param {string} token - El token de autenticación del usuario.
+ * @returns {Promise<ProductSingleResponse>} Una promesa que resuelve con la respuesta de la API.
+ * @throws {Error} Lanza un error si la solicitud falla.
  */
-export const getAllInventoryProducts = async (): Promise<
-  GetInventoryProductResponse[]
-> => {
-  try {
-    const response = await fetch(`${API_URL}`); // Ajusta esta URL si tu ruta es diferente
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(
-        errorData.message || "Error al cargar productos del inventario."
-      );
-    }
-    const data: GetInventoryProductResponse[] = await response.json();
-    return data;
-  } catch (error) {
-    console.error(
-      "Error en salesService.ts -> getAllInventoryProducts:",
-      error
-    );
-    throw error;
-  }
+export const createProduct = async (
+  newProduct: Omit<Product, "id">,
+  token?: string
+): Promise<ProductSingleResponse> => {
+  return apiClient<ProductSingleResponse>("/inventory", {
+    method: "POST",
+    body: JSON.stringify(newProduct),
+    token: token || undefined,
+  });
 };
 
 /**
- * Busca productos en el inventario por nombre.
- * La API: GET /api/inventory/search?name={searchTerm}
- * @param {string} searchTerm El término de búsqueda para el nombre del producto.
- * @returns {Promise<GetInventoryProductResponse[]>} Una promesa que resuelve con un array de productos que coinciden.
+ * @function updateProduct
+ * @description Actualiza un producto existente en el inventario.
+ * @param {Product} updatedProduct - Los datos del producto a actualizar (debe incluir el ID).
+ * @param {string} token - El token de autenticación del usuario.
+ * @returns {Promise<ProductSingleResponse>} Una promesa que resuelve con la respuesta de la API.
+ * @throws {Error} Lanza un error si la solicitud falla.
+ */
+export const updateProduct = async (
+  updatedProduct: Product,
+  token: string
+): Promise<ProductSingleResponse> => {
+  return apiClient<ProductSingleResponse>(`/inventory/${updatedProduct.id}`, {
+    method: "PUT",
+    body: JSON.stringify(updatedProduct),
+    token: token || undefined,
+  });
+};
+
+/**
+ * @function getAllInventoryProducts
+ * @description Obtiene todos los productos del inventario desde la API.
+ * @param {string} token - El token de autenticación del usuario.
+ * @returns {Promise<ProductApiResponse>} Una promesa que resuelve con la respuesta de la API.
+ * @throws {Error} Lanza un error si la solicitud falla.
+ */
+export const getAllInventoryProducts = async (
+  token: string
+): Promise<ProductApiResponse> => {
+  return apiClient<ProductApiResponse>("/inventory", { token });
+};
+
+/**
+ * @function searchProductsByName
+ * @description Busca productos en el inventario por nombre.
+ * @param {string} searchTerm - El término de búsqueda para el nombre del producto.
+ * @param {string} token - El token de autenticación del usuario.
+ * @returns {Promise<ProductApiResponse>} Una promesa que resuelve con la respuesta de la API.
+ * @throws {Error} Lanza un error si la solicitud falla.
  */
 export const searchProductsByName = async (
-  searchTerm: string
-): Promise<GetInventoryProductResponse[]> => {
-  try {
-    // Codificamos el término de búsqueda para URLs
-    const encodedSearchTerm = encodeURIComponent(searchTerm);
-    const response = await fetch(`${API_URL}/search?name=${encodedSearchTerm}`); // Nueva API
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(
-        errorData.message ||
-          `Error al buscar productos con el término "${searchTerm}".`
-      );
-    }
-
-    const data: GetInventoryProductResponse[] = await response.json();
-    return data;
-  } catch (error) {
-    console.error(
-      "Error en inventoryService.ts -> searchProductsByName:",
-      error
-    );
-    throw error;
-  }
+  searchTerm: string,
+  token: string
+): Promise<ProductApiResponse> => {
+  const encodedSearchTerm = encodeURIComponent(searchTerm);
+  return apiClient<ProductApiResponse>(
+    `/inventory/search?name=${encodedSearchTerm}`,
+    { token }
+  );
 };

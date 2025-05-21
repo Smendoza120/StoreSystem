@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import HeaderInventory from "../components/layout/HeaderInventory";
 import ActionBar from "../components/layout/ActionBar";
-import ProductTable from "../components/product/ProductTable";
+import ProductTable from "../components/inventory/ProductTable";
 import Pagination from "../components/common/Pagination";
 import useInventory from "../hooks/useInventory";
 import {
@@ -15,33 +15,43 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  type SelectChangeEvent,
 } from "@mui/material";
-import CreateProductForm from "../components/product/CreateProductForm";
 import type { Product } from "../interfaces/inventory";
 import { createProduct, updateProduct } from "../services/inventoryService";
-import EditProductForm from "../components/product/EditProductForm";
+import CreateProductForm from "../components/inventory/CreateProductForm";
+import EditProductForm from "../components/inventory/EditProductForm";
 
 const InventoryPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [createProductError, setCreateProductError] = useState<string | null>(
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [apiSuccessMessage, setApiSuccessMessage] = useState<string | null>(
     null
   );
-  const [createProductSuccess, setCreateProductSuccess] =
-    useState<boolean>(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
-  const productsPerPage = 5;
+
+  // const token = localStorage.getItem("token") || "";
+  const token = "";
+
   const {
     inventoryData,
     loading,
     error,
     totalItems,
     refetch: refetchInventory,
-  } = useInventory(page, itemsPerPage);
+  } = useInventory(page, itemsPerPage, token);
 
   const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+  useEffect(() => {
+    if (!isCreateDialogOpen && !isEditDialogOpen) {
+      setApiError(null);
+      setApiSuccessMessage(null);
+    }
+  }, [isCreateDialogOpen, isEditDialogOpen]);
 
   const handleOpenCreateDialog = () => {
     setIsCreateDialogOpen(true);
@@ -50,9 +60,7 @@ const InventoryPage: React.FC = () => {
 
   const handleCloseCreateDialog = () => {
     setIsCreateDialogOpen(false);
-    setCreateProductError(null);
-    setCreateProductSuccess(false);
-    setProductToEdit(null);
+    setApiError(null);
   };
 
   const handleOpenEditDialog = (product: Product) => {
@@ -63,35 +71,50 @@ const InventoryPage: React.FC = () => {
   const handleCloseEditDialog = () => {
     setIsEditDialogOpen(false);
     setProductToEdit(null);
-    setCreateProductError(null);
-    setCreateProductSuccess(false);
+    setApiError(null);
   };
 
   const handleCreateProduct = async (newProduct: Omit<Product, "id">) => {
     try {
-      await createProduct(newProduct);
-      setCreateProductSuccess(true);
-      refetchInventory();
-      setTimeout(() => setCreateProductSuccess(false), 3000);
-    } catch (err: any) {
-      setCreateProductError(
-        err.message || "Error de conexión al crear el producto"
-      );
+      const response = await createProduct(newProduct, token);
+      if (response.success) {
+        setApiSuccessMessage(
+          response.message || "Producto creado exitosamente."
+        );
+        refetchInventory();
+        handleCloseCreateDialog();
+      } else {
+        setApiError(response.message || "Error al crear el producto.");
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setApiError(err.message || "Error de conexión al crear el producto.");
+      } else {
+        setApiError("Ocurrió un error inesperado al crear el producto.");
+      }
     }
   };
 
   const handleUpdateProduct = async (updatedProduct: Product) => {
     try {
-      await updateProduct(updatedProduct);
-      setCreateProductSuccess(true);
-      refetchInventory();
-      setTimeout(() => setCreateProductSuccess(false), 3000);
-    } catch (err: any) {
-      setCreateProductError(
-        err.message || "Error de conexión al actualizar el producto"
-      );
-    } finally {
-      handleCloseEditDialog();
+      const response = await updateProduct(updatedProduct, token);
+      if (response.success) {
+        setApiSuccessMessage(
+          response.message || "Producto actualizado exitosamente."
+        );
+        refetchInventory();
+        handleCloseEditDialog();
+      } else {
+        setApiError(response.message || "Error al actualizar el producto.");
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setApiError(
+          err.message || "Error de conexión al actualizar el producto."
+        );
+      } else {
+        setApiError("Ocurrió un error inesperado al actualizar el producto.");
+      }
     }
   };
 
@@ -102,9 +125,9 @@ const InventoryPage: React.FC = () => {
     setPage(newPage);
   };
 
-  const handleChangeItemsPerPage = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setItemsPerPage(parseInt(event.target.value, 10));
-    setPage(1); 
+  const handleChangeItemsPerPage = (event: SelectChangeEvent<number>) => {
+    setItemsPerPage(parseInt(String(event.target.value), 10));
+    setPage(1);
   };
 
   const handleCloseSnackbar = (
@@ -114,11 +137,11 @@ const InventoryPage: React.FC = () => {
     if (reason === "clickaway") {
       return;
     }
-    setCreateProductSuccess(false);
+    setApiSuccessMessage(null);
   };
 
-  const startIndex = (page - 1) * productsPerPage;
-  const endIndex = Math.min(startIndex + productsPerPage, totalItems);
+  const startIndex = (page - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -126,18 +149,18 @@ const InventoryPage: React.FC = () => {
         <HeaderInventory />
         <ActionBar onOpenCreateDialog={handleOpenCreateDialog} />
 
-        {createProductSuccess && (
+        {apiSuccessMessage && (
           <Snackbar
-            open={createProductSuccess}
+            open={!!apiSuccessMessage}
             autoHideDuration={3000}
             onClose={handleCloseSnackbar}
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-            message="Producto guardado correctamente" 
+            message="Producto guardado correctamente"
           />
         )}
-        {createProductError && (
+        {apiError && (
           <Alert severity="error" sx={{ mb: 2 }}>
-            {createProductError}
+            {apiError}
           </Alert>
         )}
 
@@ -196,7 +219,6 @@ const InventoryPage: React.FC = () => {
           </>
         )}
 
-        {/* Diálogo para la creación de productos */}
         <Dialog
           open={isCreateDialogOpen}
           onClose={handleCloseCreateDialog}
@@ -209,14 +231,13 @@ const InventoryPage: React.FC = () => {
           />
         </Dialog>
 
-        {/* Diálogo para la edición de productos */}
         <Dialog
           open={isEditDialogOpen}
           onClose={handleCloseEditDialog}
           fullWidth
           maxWidth="sm"
         >
-          {productToEdit ? ( 
+          {productToEdit ? (
             <EditProductForm
               onClose={handleCloseEditDialog}
               onUpdate={handleUpdateProduct}

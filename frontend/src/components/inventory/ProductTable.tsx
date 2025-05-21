@@ -27,8 +27,6 @@ const ProductTable: React.FC<ProductTableProps> = ({
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const open = Boolean(anchorEl);
-  const stockAlto = 10;
-  const stockBajo = 5;
 
   const handleClick = (
     event: React.MouseEvent<HTMLButtonElement>,
@@ -55,6 +53,41 @@ const ProductTable: React.FC<ProductTableProps> = ({
     if (selectedProduct) {
       console.log(`Eliminar producto con ID: ${selectedProduct.id}`);
       // Aquí iría la lógica para eliminar el producto
+    }
+  };
+
+  const getStockStatusColor = (status: Product["stockStatus"]) => {
+    switch (status) {
+      case "bien":
+      case "good":
+        return "success";
+      case "bajo":
+      case "low":
+        return "warning";
+      case "agotado":
+      case "out of stock":
+        return "error";
+      default:
+        return "primary";
+    }
+  };
+
+  const getDisplayStockStatus = (status: Product["stockStatus"]) => {
+    switch (status) {
+      case "bien":
+        return "Bien";
+      case "bajo":
+        return "Bajo";
+      case "agotado":
+        return "Agotado";
+      case "good":
+        return "Bien";
+      case "low":
+        return "Bajo";
+      case "out of stock":
+        return "Agotado";
+      default:
+        return status;
     }
   };
 
@@ -89,19 +122,9 @@ const ProductTable: React.FC<ProductTableProps> = ({
                 <Button
                   size="small"
                   variant="outlined"
-                  color={
-                    product.quantity > stockAlto
-                      ? "success"
-                      : product.quantity > stockBajo
-                      ? "warning"
-                      : "error"
-                  }
+                  color={getStockStatusColor(product.stockStatus)}
                 >
-                  {product.quantity > stockAlto
-                    ? "En stock"
-                    : product.quantity > stockBajo
-                    ? "Stock bajo"
-                    : "Agotado"}
+                  {getDisplayStockStatus(product.stockStatus)}
                 </Button>
               </TableCell>
               <TableCell>
@@ -114,7 +137,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
                 <Menu
                   id={`menu-${product.id}`}
                   anchorEl={anchorEl}
-                  open={open}
+                  open={open && selectedProduct?.id === product.id}
                   onClose={handleClose}
                   anchorOrigin={{
                     vertical: "top",
