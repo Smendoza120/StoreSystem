@@ -1,8 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
-import { inventory, getStockStatus } from './inventory.controller.mjs';
 import PDFDocument from 'pdfkit';
-
-let salesHistory = [];
+import { getStockStatus } from './inventory.controller.mjs';
+import { inventory, salesHistory } from '../data/mockData.mjs';
 
 const generateSaleId = () => {
   return uuidv4();
@@ -101,7 +100,7 @@ export const generateInvoicePDF = (sale) => {
 
     sale.products.forEach(item => {
       doc.text(item.name, 50, itemY, { width: 155 });
-      doc.text(item.quantity.toString(), 200, itemY + 0.5, { width: 55, align: 'right' }); 
+      doc.text(item.quantity.toString(), 200, itemY + 0.5, { width: 55, align: 'right' });
       doc.text(`$${item.unitPrice.toFixed(2)}`, 250, itemY, { width: 105, align: 'right' });
       doc.text(`$${item.totalPrice.toFixed(2)}`, 350, itemY, { width: 105, align: 'right' });
       itemY += lineHeight;

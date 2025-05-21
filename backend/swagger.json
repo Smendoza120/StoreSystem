@@ -287,7 +287,7 @@
         ],
         "responses": {
           "200": {
-            "description": "List of products matching the search term.",
+            "description": "List of products matching the search term. Returns an empty array if no products are found.",
             "content": {
               "application/json": {
                 "schema": {
@@ -301,9 +301,6 @@
           },
           "400": {
             "description": "Error if the 'name' query parameter is not provided."
-          },
-          "404": {
-            "description": "No products found matching the search term."
           }
         },
         "tags": [

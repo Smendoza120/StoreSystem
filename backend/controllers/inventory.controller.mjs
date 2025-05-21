@@ -1,8 +1,4 @@
-export let inventory = [];
-
-const generateProductId = () => {
-  return Math.random().toString(36).substring(2, 15);
-};
+import { inventory, generateProductId } from "../data/mockData.mjs";
 
 export const getStockStatus = (cantidad) => {
   if (cantidad > 10) {
@@ -99,24 +95,20 @@ export const getProductById = (req, res) => {
 };
 
 export const searchProductByName = (req, res) => {
-    console.log("Función searchProductByName ejecutada:", req.query.name);
-    const { name } = req.query;
+  console.log("Función searchProductByName ejecutada:", req.query.name);
+  const { name } = req.query;
 
-    if (!name) {
-        return res.status(400).json({ message: "Product name is required for searching." });
-    }
+  if (!name) {
+    return res.status(400).json({ message: "Product name is required for searching." });
+  }
 
-    const results = inventory.filter(item =>
-        item.name.toLowerCase().includes(name.toLowerCase())
-    );
+  const results = inventory.filter(item =>
+    item.name.toLowerCase().includes(name.toLowerCase())
+  );
 
-    console.log("Resultados de la búsqueda:", results); // Agrega este log también
+  console.log("Resultados de la búsqueda:", results);
 
-    if (results.length > 0) {
-        return res.status(200).json(results);
-    } else {
-        return res.status(404).json({ message: `No products found with the name "${name}".` });
-    }
+  return res.status(200).json(results);
 };
 
 export const updateProduct = (req, res) => {

@@ -1,6 +1,7 @@
 import express from "express";
-const router = express.Router();
 import * as inventoryController from "../controllers/inventory.controller.mjs";
+
+const router = express.Router();
 
 /**
  * @route POST /api/inventory
