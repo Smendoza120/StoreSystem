@@ -2,11 +2,11 @@ import express from "express";
 import path from "path";
 import fs from "fs";
 import cors from "cors";
-import userRoutes from "./routes/user.routes.mjs";
-import inventoryRoutes from "./routes/inventory.routes.mjs";
-import salesRoutes from "./routes/sales.routes.mjs";
 import swaggerUI from "swagger-ui-express";
-import * as userController from "./controllers/users.controller.mjs";
+import * as userController from "./src/controllers/users.controller.mjs";
+import userRoutes from "./src/routes/user.routes.mjs";
+import salesRoutes from "./src/routes/sales.routes.mjs";
+import inventoryRoutes from "./src/routes/inventory.routes.mjs";
 
 const app = express();
 const port = 3000;

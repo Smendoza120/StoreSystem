@@ -86,6 +86,7 @@
     * Construir la versión de producción de la aplicación React y desplegar los archivos estáticos en un servicio de hosting de sitios estáticos.
 
 # Tareas pendientes
+- [] Organizar todo el backend
 - [] Crear 2 IAS una para solucionar front y otra para solucionar back de este proyecto
 - [] API para eliminar productos
 - [] Agregar lista de categorias y estados para el filtro
