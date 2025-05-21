@@ -491,169 +491,53 @@
     },
     "/api/sales": {
       "post": {
-        "summary": "Record a new sale.",
-        "description": "Records a new sale, updates the sales history, and decreases the stock quantity of the sold products.",
+        "summary": "Registrar una nueva venta.",
+        "description": "Registra una nueva venta, actualiza el historial de ventas y disminuye la cantidad de stock de los productos vendidos.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "products": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "productId": {
-                          "type": "string",
-                          "example": "abc-123-xyz"
-                        },
-                        "quantity": {
-                          "type": "integer",
-                          "example": 2
-                        }
-                      }
-                    }
-                  }
-                }
+                "$ref": "#/components/schemas/SaleRequest"
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Sale recorded successfully.",
+            "description": "Venta registrada exitosamente.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "example": "Sale recorded successfully."
-                    },
-                    "sale": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string",
-                          "example": "uuid-de-la-venta"
-                        },
-                        "date": {
-                          "type": "string",
-                          "format": "date-time",
-                          "example": "2025-05-18T15:30:00.000Z"
-                        },
-                        "products": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "productId": {
-                                "type": "string",
-                                "example": "abc-123-xyz"
-                              },
-                              "name": {
-                                "type": "string",
-                                "example": "Brand X Potato Chips"
-                              },
-                              "quantity": {
-                                "type": "integer",
-                                "example": 2
-                              },
-                              "unitPrice": {
-                                "type": "number",
-                                "format": "float",
-                                "example": 1.5
-                              },
-                              "totalPrice": {
-                                "type": "number",
-                                "format": "float",
-                                "example": 3
-                              }
-                            }
-                          }
-                        },
-                        "totalSaleAmount": {
-                          "type": "number",
-                          "format": "float",
-                          "example": 3
-                        }
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/SaleRecordResponse"
                 }
               }
             }
           },
           "400": {
-            "description": "Error if no products provided, product not found, or insufficient stock."
-          }
-        },
-        "tags": [
-          "Sales"
-        ]
-      }
-    },
-    "/api/sales/history": {
-      "get": {
-        "summary": "Get the history of all sales.",
-        "description": "Returns a list of all recorded sales.",
-        "responses": {
-          "200": {
-            "description": "List of all sales records.",
+            "description": "Error de validación (productos no proporcionados, no encontrados o stock insuficiente).",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string",
-                        "example": "uuid-de-la-venta"
-                      },
-                      "date": {
-                        "type": "string",
-                        "format": "date-time",
-                        "example": "2025-05-18T15:30:00.000Z"
-                      },
-                      "products": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "productId": {
-                              "type": "string",
-                              "example": "abc-123-xyz"
-                            },
-                            "name": {
-                              "type": "string",
-                              "example": "Brand X Potato Chips"
-                            },
-                            "quantity": {
-                              "type": "integer",
-                              "example": 2
-                            },
-                            "unitPrice": {
-                              "type": "number",
-                              "format": "float",
-                              "example": 1.5
-                            },
-                            "totalPrice": {
-                              "type": "number",
-                              "format": "float",
-                              "example": 3
-                            }
-                          }
-                        }
-                      },
-                      "totalSaleAmount": {
-                        "type": "number",
-                        "format": "float",
-                        "example": 3
-                      }
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "NoProductsProvided": {
+                    "value": {
+                      "success": false,
+                      "message": "No se proporcionaron productos para la venta."
+                    }
+                  },
+                  "ProductNotFound": {
+                    "value": {
+                      "success": false,
+                      "message": "Producto con ID \"abc-123-xyz\" no encontrado en el inventario."
+                    }
+                  },
+                  "InsufficientStock": {
+                    "value": {
+                      "success": false,
+                      "message": "Stock insuficiente para el producto \"Brand X Potato Chips\". Disponible: 5, Solicitado: 10"
                     }
                   }
                 }
@@ -662,16 +546,78 @@
           }
         },
         "tags": [
-          "Sales"
+          "Ventas"
+        ]
+      }
+    },
+    "/api/sales/history": {
+      "get": {
+        "summary": "Obtener el historial de todas las ventas.",
+        "description": "Retorna una lista de todos los registros de ventas, incluyendo detalles de los productos vendidos y el monto total.",
+        "responses": {
+          "200": {
+            "description": "Lista de todos los registros de ventas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesHistoryResponse"
+                },
+                "example": {
+                  "success": true,
+                  "message": "Historial de ventas recuperado exitosamente.",
+                  "data": [
+                    {
+                      "id": "sale-001",
+                      "date": "2024-05-20T10:00:00.000Z",
+                      "products": [
+                        {
+                          "productId": "prod-001",
+                          "name": "Laptop Gamer X",
+                          "quantity": 1,
+                          "unitPrice": 1200,
+                          "totalPrice": 1200
+                        },
+                        {
+                          "productId": "prod-002",
+                          "name": "Mouse RGB",
+                          "quantity": 2,
+                          "unitPrice": 25,
+                          "totalPrice": 50
+                        }
+                      ],
+                      "totalSaleAmount": 1250
+                    },
+                    {
+                      "id": "sale-002",
+                      "date": "2024-05-20T11:30:00.000Z",
+                      "products": [
+                        {
+                          "productId": "prod-003",
+                          "name": "Teclado Mecánico",
+                          "quantity": 1,
+                          "unitPrice": 80,
+                          "totalPrice": 80
+                        }
+                      ],
+                      "totalSaleAmount": 80
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Ventas"
         ]
       }
     },
     "/api/sales/{saleId}/invoice": {
       "get": {
-        "summary": "Descargar factura de venta en PDF",
+        "summary": "Descargar factura de venta en PDF.",
         "description": "Genera y descarga la factura en formato PDF para una venta específica.",
         "tags": [
-          "Sales"
+          "Ventas"
         ],
         "parameters": [
           {
@@ -680,7 +626,8 @@
             "required": true,
             "description": "ID de la venta para la cual se generará la factura.",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "example": "uuid-de-la-venta"
             }
           }
         ],
@@ -701,13 +648,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "example": "Sale with ID \"some-sale-id\" not found."
-                    }
-                  }
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "message": "Venta con ID \"some-sale-id\" no encontrada."
                 }
               }
             }
@@ -717,13 +662,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "example": "Failed to generate invoice PDF."
-                    }
-                  }
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "message": "Fallo al generar el PDF de la factura."
                 }
               }
             }
@@ -1282,6 +1225,116 @@
               "El precio unitario debe ser un número positivo.",
               "La ubicación de almacenamiento debe ser 'in stock' o 'in warehouse'."
             ]
+          }
+        }
+      },
+      "SaleProductItem": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "example": "abc-123-xyz"
+          },
+          "name": {
+            "type": "string",
+            "example": "Brand X Potato Chips"
+          },
+          "quantity": {
+            "type": "integer",
+            "example": 2
+          },
+          "unitPrice": {
+            "type": "number",
+            "format": "float",
+            "example": 1.5
+          },
+          "totalPrice": {
+            "type": "number",
+            "format": "float",
+            "example": 3
+          }
+        }
+      },
+      "SaleRecord": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-de-la-venta"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-05-18T15:30:00.000Z"
+          },
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SaleProductItem"
+            }
+          },
+          "totalSaleAmount": {
+            "type": "number",
+            "format": "float",
+            "example": 3
+          }
+        }
+      },
+      "SaleRequest": {
+        "type": "object",
+        "properties": {
+          "products": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "productId": {
+                  "type": "string",
+                  "example": "abc-123-xyz"
+                },
+                "quantity": {
+                  "type": "integer",
+                  "example": 2
+                }
+              }
+            },
+            "minItems": 1,
+            "description": "Array de objetos de productos con su ID y cantidad vendida."
+          }
+        }
+      },
+      "SaleRecordResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Venta registrada exitosamente."
+          },
+          "sale": {
+            "$ref": "#/components/schemas/SaleRecord"
+          }
+        }
+      },
+      "SalesHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Historial de ventas recuperado exitosamente."
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SaleRecord"
+            }
           }
         }
       },
