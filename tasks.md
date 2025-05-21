@@ -87,6 +87,7 @@
 
 # Tareas pendientes
 - [] Crear 2 IAS una para solucionar front y otra para solucionar back de este proyecto
+- [] API para eliminar productos
 - [] Agregar lista de categorias y estados para el filtro
 - [] Hacer el filtro en la parte front
 - [] Realizar las ventas diarias
