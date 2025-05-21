@@ -13,14 +13,20 @@
   "paths": {
     "/api/inventory": {
       "post": {
-        "summary": "Add a new product to the inventory or update an existing one.",
-        "description": "Allows adding a new product or increasing the quantity of an existing product by its name.",
+        "summary": "Add a new product or update an existing one in the inventory.",
+        "description": "Allows adding a new product or increasing/updating the quantity and storage location of an existing product by its name.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "name",
+                  "unitPrice",
+                  "quantity",
+                  "storageLocation"
+                ],
                 "properties": {
                   "name": {
                     "type": "string",
@@ -43,6 +49,26 @@
                     ],
                     "example": "in stock"
                   }
+                },
+                "examples": {
+                  "addNewProduct": {
+                    "summary": "Add new product",
+                    "value": {
+                      "name": "Brand X Soda",
+                      "unitPrice": 2.25,
+                      "quantity": 50,
+                      "storageLocation": "in warehouse"
+                    }
+                  },
+                  "updateExistingProduct": {
+                    "summary": "Update quantity of existing product",
+                    "value": {
+                      "name": "Brand X Potato Chips",
+                      "unitPrice": 1.5,
+                      "quantity": 10,
+                      "storageLocation": "in stock"
+                    }
+                  }
                 }
               }
             }
@@ -56,11 +82,15 @@
                 "schema": {
                   "type": "object",
                   "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
                     "message": {
                       "type": "string",
-                      "example": "Quantity of \"Brand X Potato Chips\" updated"
+                      "example": "Quantity of \"Brand X Potato Chips\" updated."
                     },
-                    "product": {
+                    "data": {
                       "$ref": "#/components/schemas/Product"
                     }
                   }
@@ -75,11 +105,15 @@
                 "schema": {
                   "type": "object",
                   "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
                     "message": {
                       "type": "string",
-                      "example": "Product \"Brand X Potato Chips\" added"
+                      "example": "Product \"Brand X Soda\" added."
                     },
-                    "product": {
+                    "data": {
                       "$ref": "#/components/schemas/Product"
                     }
                   }
@@ -88,7 +122,14 @@
             }
           },
           "400": {
-            "description": "Error if required fields are not provided or storage location is invalid."
+            "description": "Error if required fields are not provided or storage location is invalid, or if data types are incorrect.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -96,18 +137,78 @@
         ]
       },
       "get": {
-        "summary": "Get the complete inventory list.",
-        "description": "Returns an array with all products in the inventory, including their quantity, price, and location.",
+        "summary": "Get the complete inventory list with pagination.",
+        "description": "Returns a paginated list of all products in the inventory, including their quantity, price, and location.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Number of items per page for pagination."
+          }
+        ],
         "responses": {
           "200": {
-            "description": "List of products in the inventory.",
+            "description": "Paginated list of products in the inventory.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Product"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Inventario recuperado exitosamente."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "totalItems": {
+                          "type": "integer",
+                          "example": 50
+                        },
+                        "totalPages": {
+                          "type": "integer",
+                          "example": 5
+                        },
+                        "currentPage": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "products": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Product"
+                          }
+                        }
+                      }
+                    }
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid page or limit parameters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -130,7 +231,7 @@
             "description": "ID of the product to retrieve.",
             "schema": {
               "type": "string",
-              "example": "abc-123-xyz"
+              "example": "PROD-0001"
             }
           }
         ],
@@ -140,13 +241,33 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Product"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Producto encontrado."
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Product"
+                    }
+                  }
                 }
               }
             }
           },
           "404": {
-            "description": "Product not found."
+            "description": "Product not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -155,7 +276,7 @@
       },
       "put": {
         "summary": "Update the information of a product by its ID.",
-        "description": "Allows modifying the price, quantity, and location of an existing product.",
+        "description": "Allows modifying the price, quantity, and location of an existing product. All fields are optional, but at least one must be provided.",
         "parameters": [
           {
             "in": "path",
@@ -164,7 +285,7 @@
             "description": "ID of the product to update.",
             "schema": {
               "type": "string",
-              "example": "abc-123-xyz"
+              "example": "PROD-0001"
             }
           }
         ],
@@ -192,7 +313,8 @@
                     ],
                     "example": "in warehouse"
                   }
-                }
+                },
+                "minProperties": 1
               }
             }
           }
@@ -205,11 +327,15 @@
                 "schema": {
                   "type": "object",
                   "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
                     "message": {
                       "type": "string",
-                      "example": "Product with ID \"abc-123-xyz\" updated"
+                      "example": "Product with ID \"PROD-0001\" updated successfully."
                     },
-                    "product": {
+                    "data": {
                       "$ref": "#/components/schemas/Product"
                     }
                   }
@@ -218,10 +344,24 @@
             }
           },
           "400": {
-            "description": "Error if the provided storage location is invalid."
+            "description": "Error if validation fails for any of the fields provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           },
           "404": {
-            "description": "Product not found."
+            "description": "Product not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -239,7 +379,7 @@
             "description": "ID of the product to delete.",
             "schema": {
               "type": "string",
-              "example": "abc-123-xyz"
+              "example": "PROD-0001"
             }
           }
         ],
@@ -251,17 +391,38 @@
                 "schema": {
                   "type": "object",
                   "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
                     "message": {
                       "type": "string",
-                      "example": "Product with ID \"abc-123-xyz\" deleted."
+                      "example": "Product with ID \"PROD-0001\" deleted successfully."
                     }
                   }
                 }
               }
             }
           },
+          "400": {
+            "description": "Error if the product ID is not provided or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "404": {
-            "description": "Product not found."
+            "description": "Product not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -291,16 +452,36 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Product"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Resultados de búsqueda para \"potato\"."
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Product"
+                      }
+                    }
                   }
                 }
               }
             }
           },
           "400": {
-            "description": "Error if the 'name' query parameter is not provided."
+            "description": "Error if the 'name' query parameter is not provided or is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -1000,7 +1181,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "example": "abc-123-xyz"
+            "example": "PROD-0001"
           },
           "name": {
             "type": "string",
@@ -1022,11 +1203,35 @@
           "stockStatus": {
             "type": "string",
             "enum": [
-              "good",
-              "medium",
-              "low"
+              "bien",
+              "medio",
+              "bajo"
             ],
-            "example": "good"
+            "example": "bien"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "type": "string",
+            "example": "Errores de validación"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "El nombre del producto es requerido y debe ser una cadena de texto."
+            },
+            "example": [
+              "El precio unitario debe ser un número positivo.",
+              "La ubicación de almacenamiento debe ser 'in stock' o 'in warehouse'."
+            ]
           }
         }
       }

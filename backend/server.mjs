@@ -29,7 +29,6 @@ app.get("/", (req, res) => {
   res.send(`¡El servidor backend está funcionando! en el puerto ${port}`);
 });
 
-
 app.post("/api/auth/login", userController.loginUser);
 
 app.use("/api/users", userRoutes);

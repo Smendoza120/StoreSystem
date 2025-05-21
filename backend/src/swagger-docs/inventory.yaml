@@ -1,13 +1,18 @@
 /api/inventory:
   post:
-    summary: Add a new product to the inventory or update an existing one.
-    description: Allows adding a new product or increasing the quantity of an existing product by its name.
+    summary: Add a new product or update an existing one in the inventory.
+    description: Allows adding a new product or increasing/updating the quantity and storage location of an existing product by its name.
     requestBody:
       required: true
       content:
         application/json:
           schema:
             type: object
+            required: # Ahora sí se especifican los campos requeridos explícitamente.
+              - name
+              - unitPrice
+              - quantity
+              - storageLocation
             properties:
               name:
                 type: string
@@ -23,6 +28,21 @@
                 type: string
                 enum: ["in stock", "in warehouse"]
                 example: "in stock"
+            examples: # Agregamos ejemplos para claridad
+              addNewProduct:
+                summary: Add new product
+                value:
+                  name: "Brand X Soda"
+                  unitPrice: 2.25
+                  quantity: 50
+                  storageLocation: "in warehouse"
+              updateExistingProduct:
+                summary: Update quantity of existing product
+                value:
+                  name: "Brand X Potato Chips"
+                  unitPrice: 1.50 # Puede o no estar
+                  quantity: 10   # Esto se sumará a lo existente
+                  storageLocation: "in stock" # Puede o no estar
     responses:
       '201':
         description: Product added successfully.
@@ -31,10 +51,13 @@
             schema:
               type: object
               properties:
+                success:
+                  type: boolean
+                  example: true
                 message:
                   type: string
-                  example: Product "Brand X Potato Chips" added
-                product:
+                  example: Product "Brand X Soda" added.
+                data:
                   $ref: '#/components/schemas/Product'
       '200':
         description: Quantity of existing product updated.
@@ -43,27 +66,74 @@
             schema:
               type: object
               properties:
+                success:
+                  type: boolean
+                  example: true
                 message:
                   type: string
-                  example: Quantity of "Brand X Potato Chips" updated
-                product:
+                  example: Quantity of "Brand X Potato Chips" updated.
+                data:
                   $ref: '#/components/schemas/Product'
       '400':
-        description: Error if required fields are not provided or storage location is invalid.
-    tags:
-      - Inventory
-  get:
-    summary: Get the complete inventory list.
-    description: Returns an array with all products in the inventory, including their quantity, price, and location.
-    responses:
-      '200':
-        description: List of products in the inventory.
+        description: Error if required fields are not provided or storage location is invalid, or if data types are incorrect.
         content:
           application/json:
             schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/Product'
+              $ref: '#/components/schemas/ErrorResponse' # Reutilizamos el schema de error
+    tags:
+      - Inventory
+  get:
+    summary: Get the complete inventory list with pagination.
+    description: Returns a paginated list of all products in the inventory, including their quantity, price, and location.
+    parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+          default: 1
+        description: Page number for pagination.
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          default: 10
+        description: Number of items per page for pagination.
+    responses:
+      '200':
+        description: Paginated list of products in the inventory.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: Inventario recuperado exitosamente.
+                data:
+                  type: object
+                  properties:
+                    totalItems:
+                      type: integer
+                      example: 50
+                    totalPages:
+                      type: integer
+                      example: 5
+                    currentPage:
+                      type: integer
+                      example: 1
+                    products:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Product'
+      '400':
+        description: Invalid page or limit parameters.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErrorResponse'
     tags:
       - Inventory
 
@@ -78,21 +148,34 @@
         description: ID of the product to retrieve.
         schema:
           type: string
-          example: abc-123-xyz
+          example: PROD-0001
     responses:
       '200':
         description: Product found.
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Product'
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: Producto encontrado.
+                data:
+                  $ref: '#/components/schemas/Product'
       '404':
         description: Product not found.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErrorResponse'
     tags:
       - Inventory
   put:
     summary: Update the information of a product by its ID.
-    description: Allows modifying the price, quantity, and location of an existing product.
+    description: Allows modifying the price, quantity, and location of an existing product. All fields are optional, but at least one must be provided.
     parameters:
       - in: path
         name: id
@@ -100,7 +183,7 @@
         description: ID of the product to update.
         schema:
           type: string
-          example: abc-123-xyz
+          example: PROD-0001
     requestBody:
       required: true
       content:
@@ -119,6 +202,7 @@
                 type: string
                 enum: ["in stock", "in warehouse"]
                 example: "in warehouse"
+            minProperties: 1 # Al menos una propiedad debe estar presente
     responses:
       '200':
         description: Product updated successfully.
@@ -127,18 +211,29 @@
             schema:
               type: object
               properties:
+                success:
+                  type: boolean
+                  example: true
                 message:
                   type: string
-                  example: Product with ID "abc-123-xyz" updated
-                product:
+                  example: Product with ID "PROD-0001" updated successfully.
+                data:
                   $ref: '#/components/schemas/Product'
       '400':
-        description: Error if the provided storage location is invalid.
+        description: Error if validation fails for any of the fields provided.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErrorResponse'
       '404':
         description: Product not found.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErrorResponse'
     tags:
       - Inventory
-  delete: # Nueva definición para el endpoint DELETE
+  delete:
     summary: Delete a product from the inventory by its ID.
     description: Removes a specific product from the inventory based on its unique ID.
     parameters:
@@ -148,7 +243,7 @@
         description: ID of the product to delete.
         schema:
           type: string
-          example: abc-123-xyz
+          example: PROD-0001
     responses:
       '200':
         description: Product deleted successfully.
@@ -157,11 +252,24 @@
             schema:
               type: object
               properties:
+                success:
+                  type: boolean
+                  example: true
                 message:
                   type: string
-                  example: Product with ID "abc-123-xyz" deleted.
+                  example: Product with ID "PROD-0001" deleted successfully.
+      '400':
+        description: Error if the product ID is not provided or invalid.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErrorResponse'
       '404':
         description: Product not found.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErrorResponse'
     tags:
       - Inventory
 
@@ -183,11 +291,24 @@
         content:
           application/json:
             schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/Product'
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: Resultados de búsqueda para "potato".
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Product'
       '400':
-        description: Error if the 'name' query parameter is not provided.
+        description: Error if the 'name' query parameter is not provided or is invalid.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErrorResponse'
     tags:
       - Inventory
 
@@ -198,7 +319,7 @@ components:
       properties:
         id:
           type: string
-          example: abc-123-xyz
+          example: PROD-0001
         name:
           type: string
           example: Brand X Potato Chips
@@ -214,5 +335,20 @@ components:
           example: "in stock"
         stockStatus:
           type: string
-          enum: ["good", "medium", "low"]
-          example: "good"
+          enum: ["bien", "medio", "bajo"] # Usamos los valores de tu función getStockStatus
+          example: "bien"
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Errores de validación"
+        errors:
+          type: array
+          items:
+            type: string
+            example: "El nombre del producto es requerido y debe ser una cadena de texto."
+          example: ["El precio unitario debe ser un número positivo.", "La ubicación de almacenamiento debe ser 'in stock' o 'in warehouse'."]
