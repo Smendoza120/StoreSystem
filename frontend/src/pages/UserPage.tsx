@@ -31,7 +31,7 @@ const transformUserDataToUserTable = (data: {
     control_usuarios?: { read?: boolean; write?: boolean; delete?: boolean };
     inventario?: { read?: boolean; write?: boolean; delete?: boolean };
     ventas_diarias?: { read?: boolean; write?: boolean; delete?: boolean };
-    reportes?: { read?: boolean; write?: boolean; delete?: boolean }; // Agrega reportes si está en tu interfaz
+    reportes?: { read?: boolean; write?: boolean; delete?: boolean };
   };
 }): UserDataTable => {
   return {
@@ -42,7 +42,6 @@ const transformUserDataToUserTable = (data: {
     fullName: data.fullName || "",
     username: data.username || "",
     email: data.email || "",
-    // password: data.password || "", 
     roles: data.roles || [],
     isEnabled: data.isEnabled ?? true, 
     permissions: {
