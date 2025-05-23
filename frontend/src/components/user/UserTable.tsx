@@ -20,7 +20,12 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import type { UserTableProps } from "../../interfaces/user";
 import { disableUser } from "../../services/userService";
 
-const UserTable: React.FC<UserTableProps> = ({ users, onUserStatusChange }) => {
+interface ApiError {
+  message: string;
+  statusCode?: number;
+}
+
+const UserTable: React.FC<UserTableProps> = ({ users }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -64,7 +69,6 @@ const UserTable: React.FC<UserTableProps> = ({ users, onUserStatusChange }) => {
       return;
     }
 
-    console.log(selectedUserId);
     try {
       await disableUser(selectedUserId);
       setSnackbarSeverity("success");
@@ -72,11 +76,24 @@ const UserTable: React.FC<UserTableProps> = ({ users, onUserStatusChange }) => {
         `Usuario con ID ${selectedUserId} deshabilitado exitosamente.`
       );
       setSnackbarOpen(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
       setSnackbarSeverity("error");
-      setSnackbarMessage(
-        `Error al deshabilitar usuario: ${error.message || "Error desconocido"}`
-      );
+      let errorMessage = "Error desconocido al deshabilitar usuario.";
+
+      if (error instanceof Error) {
+        errorMessage = `Error al deshabilitar usuario: ${error.message}`;
+      } else if (
+        typeof error === "object" &&
+        error !== null &&
+        "message" in error &&
+        typeof (error as { message: unknown }).message === "string"
+      ) {
+        errorMessage = `Error al deshabilitar usuario: ${
+          (error as ApiError).message
+        }`;
+      }
+
+      setSnackbarMessage(errorMessage);
       setSnackbarOpen(true);
     } finally {
       handleMenuClose();
@@ -86,8 +103,6 @@ const UserTable: React.FC<UserTableProps> = ({ users, onUserStatusChange }) => {
   const open = Boolean(anchorEl);
   const id = open ? "user-actions-popover" : undefined;
   const currentUser = users.find((user) => user.id === selectedUserId);
-
-  console.log(currentUser);
 
   return (
     <TableContainer component={Paper}>

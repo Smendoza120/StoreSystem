@@ -37,7 +37,6 @@ const LoginForm: React.FC = () => {
 
     try {
       const response = await loginUser({ identifier, password });
-      console.log("Inicio de sesión exitoso:", response);
       localStorage.setItem("jwtToken", response.jwt);
       window.location.href = "/";
     } catch (err: unknown) {
