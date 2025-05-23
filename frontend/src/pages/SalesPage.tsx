@@ -11,7 +11,7 @@ import {
   CircularProgress,
   Snackbar,
 } from "@mui/material";
-import { recordSale } from "../services/salesService";
+import { recordSale, downloadInvoice } from "../services/salesService";
 import {
   getAllInventoryProducts,
   searchProductsByName,
@@ -26,6 +26,7 @@ import type {
   Product as InventoryProduct,
   ProductApiResponse,
 } from "../interfaces/inventory";
+import PdfDownloadDialog from "../components/sales/PdfDownloadDialog";
 
 const SalesPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -46,6 +47,9 @@ const SalesPage: React.FC = () => {
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
     "success"
   );
+  const [lastSaleId, setLastSaleId] = useState<string | null>(null);
+  const [isPdfDownloadDialogOpen, setIsPdfDownloadDialogOpen] = // <-- Nuevo estado para el diálogo de PDF
+    useState<boolean>(false);
 
   const authToken = "";
 
@@ -106,8 +110,6 @@ const SalesPage: React.FC = () => {
             authToken
           );
 
-          console.log("Respuesta completa de searchProductsByName:", response); 
-
           if (response.success && response.data) {
             const productsFound: InventoryProduct[] =
               response.data as unknown as InventoryProduct[];
@@ -115,7 +117,7 @@ const SalesPage: React.FC = () => {
             setFilteredProducts(productsFound);
 
             if (response.message) {
-              setSnackbarSeverity("success"); 
+              setSnackbarSeverity("success");
               setSnackbarMessage(response.message);
               setSnackbarOpen(true);
             }
@@ -301,9 +303,38 @@ const SalesPage: React.FC = () => {
     setIsConfirmationDialogOpen(true);
   };
 
-  const handleConfirmSale = async () => {
-    setIsConfirmationDialogOpen(false);
+  const handleGeneratePdf = async () => {
+    if (lastSaleId) {
+      setSnackbarSeverity("success");
+      setSnackbarMessage("Generando PDF de la factura...");
+      setSnackbarOpen(true);
+      try {
+        await downloadInvoice(lastSaleId, authToken);
+        setSnackbarSeverity("success");
+        setSnackbarMessage("PDF generado y descargado con éxito!");
+      } catch (err: unknown) {
+        console.error("Error al generar el PDF:", err);
+        setSnackbarSeverity("error");
+        let errorMessage =
+          "Fallo al generar el PDF. Revisa la consola para más detalles.";
+        if (err instanceof Error) {
+          errorMessage = err.message;
+        }
+        setSnackbarMessage(errorMessage);
+      } finally {
+        setIsPdfDownloadDialogOpen(false);
+      }
+    } else {
+      setSnackbarSeverity("error");
+      setSnackbarMessage(
+        "Error: No se encontró ID de venta para generar el PDF."
+      );
+      setSnackbarOpen(true);
+      setIsPdfDownloadDialogOpen(false);
+    }
+  };
 
+  const handleConfirmSale = async () => {
     const productsForSale: SalePayload["products"] = saleItems.map((item) => ({
       productId: item.id,
       quantity: item.quantity,
@@ -320,12 +351,10 @@ const SalesPage: React.FC = () => {
           `Venta realizada exitosamente! ID: ${response.data.sale.id}`
         );
         setSnackbarOpen(true);
+        setLastSaleId(response.data.sale.id); 
 
-        setSaleItems([]);
-        setTotalSale(0);
-        setSearchTerm("");
-        setFilteredProducts([]);
-        fetchAllInventoryProducts();
+        setIsConfirmationDialogOpen(false); 
+        setIsPdfDownloadDialogOpen(true); 
       } else {
         throw new Error(
           response.message || "Error desconocido al registrar la venta."
@@ -345,6 +374,23 @@ const SalesPage: React.FC = () => {
 
   const handleCloseConfirmationDialog = () => {
     setIsConfirmationDialogOpen(false);
+
+    setLastSaleId(null);
+    setSaleItems([]);
+    setTotalSale(0);
+    setSearchTerm("");
+    setFilteredProducts([]);
+    fetchAllInventoryProducts();
+  };
+
+  const handleClosePdfDownloadDialog = () => {
+    setIsPdfDownloadDialogOpen(false);
+    setLastSaleId(null);
+    setSaleItems([]);
+    setTotalSale(0);
+    setSearchTerm("");
+    setFilteredProducts([]);
+    fetchAllInventoryProducts();
   };
 
   const displayLoadingContent = loading && searchTerm.length === 0;
@@ -404,6 +450,12 @@ const SalesPage: React.FC = () => {
           onConfirm={handleConfirmSale}
           saleItems={saleItems}
           totalSale={totalSale}
+        />
+
+        <PdfDownloadDialog
+          open={isPdfDownloadDialogOpen}
+          onClose={handleClosePdfDownloadDialog}
+          onConfirmDownload={handleGeneratePdf}
         />
 
         <Snackbar

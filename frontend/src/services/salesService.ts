@@ -75,7 +75,7 @@ export const downloadInvoice = async (
 ): Promise<void> => {
   const API_BASE_URL =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
-  const url = `${API_BASE_URL}/sales/invoice/${saleId}`; 
+  const url = `${API_BASE_URL}/sales/${saleId}/invoice/`; 
 
   const headers: HeadersInit = {
     Accept: "application/pdf",

@@ -1,6 +1,22 @@
-import React from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Box } from '@mui/material';
-import type { SaleItem } from '../../interfaces/sales';
+import React from "react";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Box,
+  DialogContentText,
+} from "@mui/material";
+import type { SaleItem } from "../../interfaces/sales";
 
 interface SaleConfirmationDialogProps {
   open: boolean;
@@ -10,49 +26,69 @@ interface SaleConfirmationDialogProps {
   totalSale: number;
 }
 
-const SaleConfirmationDialog: React.FC<SaleConfirmationDialogProps> = ({ open, onClose, onConfirm, saleItems, totalSale }) => {
+const SaleConfirmationDialog: React.FC<SaleConfirmationDialogProps> = ({
+  open,
+  onClose,
+  onConfirm,
+  saleItems,
+  totalSale,
+}) => {
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Confirmar Venta</DialogTitle>
-      <DialogContent dividers>
-        <Typography variant="h6" gutterBottom>Detalle de la Venta:</Typography>
-        <TableContainer component={Paper}>
-          <Table size="small" aria-label="sale detail table">
+    <Dialog
+      open={open}
+      onClose={onClose}
+      aria-labelledby="confirm-sale-dialog-title"
+      maxWidth="md"
+      fullWidth
+    >
+      <DialogTitle id="confirm-sale-dialog-title">Confirmar Venta</DialogTitle>
+      <DialogContent>
+        <DialogContentText sx={{ mb: 2 }}>
+          Por favor, revisa los detalles de la venta antes de confirmar.
+        </DialogContentText>
+        <TableContainer component={Paper} sx={{ mb: 2 }}>
+          <Table size="small" aria-label="sale items table">
             <TableHead>
               <TableRow>
                 <TableCell>Producto</TableCell>
-                <TableCell align="center">Cantidad</TableCell>
+                <TableCell align="right">Cantidad</TableCell>
                 <TableCell align="right">Precio Unitario</TableCell>
-                <TableCell align="right">Subtotal</TableCell>
+                <TableCell align="right">Total</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {saleItems.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell>{item.name}</TableCell>
-                  <TableCell align="center">{item.quantity}</TableCell>
-                  <TableCell align="right">${item.unitPrice.toLocaleString()}</TableCell>
-                  <TableCell align="right">${item.totalPrice.toLocaleString()}</TableCell>
+                  <TableCell align="right">{item.quantity}</TableCell>
+                  <TableCell align="right">
+                    ${item.unitPrice.toFixed(2)}
+                  </TableCell>
+                  <TableCell align="right">
+                    ${item.totalPrice.toFixed(2)}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
-        <Box sx={{ mt: 2, textAlign: 'right' }}>
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
           <Typography variant="h6">
-            Total de la Venta: <Box component="span" sx={{ fontWeight: 'bold' }}>${totalSale.toLocaleString()}</Box>
+            Total a Pagar: ${totalSale.toFixed(2)}
           </Typography>
         </Box>
-        <Typography variant="body1" sx={{ mt: 2 }}>
-          ¿Desea confirmar esta venta y generar el PDF?
-        </Typography>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="error">
+        <Button onClick={onClose} color="error" variant="outlined">
           Cancelar
         </Button>
-        <Button onClick={onConfirm} variant="contained" color="primary">
-          Confirmar y Generar PDF
+        <Button
+          onClick={onConfirm}
+          color="primary"
+          variant="contained"
+          autoFocus
+        >
+          Confirmar Venta
         </Button>
       </DialogActions>
     </Dialog>
