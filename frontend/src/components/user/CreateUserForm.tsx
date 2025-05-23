@@ -16,13 +16,21 @@ import {
   FormHelperText,
   Alert,
   Typography,
+  type SelectChangeEvent,
 } from "@mui/material";
 import { createUser } from "../../services/userService";
 import type {
+  CreateUserResponseData,
   TabPanelProps,
   UserData,
   UserFormProps,
 } from "../../interfaces/user";
+import type { ApiResponse } from "../../utils/apiClient";
+
+interface ApiError {
+  message: string;
+  statusCode?: number;
+}
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -52,13 +60,12 @@ const CreateUserForm: React.FC<UserFormProps> = ({
   onCancel,
 }) => {
   const [tabValue, setTabValue] = useState(0);
-  const [fullName, setFullName] = useState(""); // Cambiado de nombreUsuario a fullName
-  const [email, setEmail] = useState(""); // Cambiado de correoElectronico a email
-  const [password, setPassword] = useState(""); // Cambiado de nuevaContrasena a password
-  const [confirmPassword, setConfirmPassword] = useState(""); // Cambiado de confirmarNuevaContrasena a confirmPassword
-  const [role, setRole] = useState(""); // Cambiado de rol a role
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [role, setRole] = useState("");
   const [permissions, setPermissions] = useState({
-    // Nombres de los estados de permisos se mantienen consistentes con el formulario
     verUsuarios: false,
     editarUsuarios: false,
     eliminarUsuarios: false,
@@ -70,18 +77,15 @@ const CreateUserForm: React.FC<UserFormProps> = ({
     generarReportes: false,
   });
 
-  // Estados para los errores de validación
-  const [fullNameError, setFullNameError] = useState(""); // Error para fullName
-  const [emailError, setEmailError] = useState(""); // Error para email
-  const [passwordError, setPasswordError] = useState(""); // Error para password
-  const [confirmPasswordError, setConfirmPasswordError] = useState(""); // Error para confirmPassword
-  const [roleError, setRoleError] = useState(""); // Error para role
+  const [fullNameError, setFullNameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [roleError, setRoleError] = useState("");
 
-  // Estado para mensajes de respuesta de la API
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Limpiar mensajes de éxito y error al cambiar de tab
   useEffect(() => {
     setSuccessMessage("");
     setErrorMessage("");
@@ -92,40 +96,51 @@ const CreateUserForm: React.FC<UserFormProps> = ({
   };
 
   const handleInputChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    event: React.ChangeEvent<
+      HTMLInputElement | { name?: string; value: unknown }
+    >
   ) => {
     const { name, value } = event.target;
-    // Limpiar mensajes de éxito y error al escribir
     setSuccessMessage("");
     setErrorMessage("");
 
     switch (name) {
       case "fullName":
-        setFullName(value);
+        setFullName(value as string);
         setFullNameError("");
         break;
       case "email":
-        setEmail(value);
+        setEmail(value as string);
         setEmailError("");
         break;
       case "password":
-        setPassword(value);
+        setPassword(value as string);
         setPasswordError("");
-        // También limpiar error de confirmación si se cambia la contraseña
         if (confirmPassword) {
           setConfirmPasswordError("");
         }
         break;
-      case "confirmPassword": // Cambiado el nombre del estado
-        setConfirmPassword(value);
+      case "confirmPassword":
+        setConfirmPassword(value as string);
         setConfirmPasswordError("");
         break;
-      case "roles": // Cambiado el nombre del estado
-        setRole(value);
+      case "roles":
+        setRole(value as string);
         setRoleError("");
         break;
       default:
         break;
+    }
+  };
+
+  const handleSelectChange = (event: SelectChangeEvent<string>) => {
+    const { name, value } = event.target;
+    setSuccessMessage("");
+    setErrorMessage("");
+
+    if (name === "roles") {
+      setRole(value as string);
+      setRoleError("");
     }
   };
 
@@ -182,7 +197,7 @@ const CreateUserForm: React.FC<UserFormProps> = ({
         fullName: fullName,
         email: email,
         password: password,
-        roles: [role.toLowerCase()], // Usa el estado 'role'
+        roles: [role.toLowerCase()],
         permissions: {
           control_usuarios: {
             read: permissions.verUsuarios,
@@ -197,25 +212,26 @@ const CreateUserForm: React.FC<UserFormProps> = ({
           ventas_diarias: {
             read: permissions.verVentas,
             write: permissions.editarVentas,
-            delete: false, // Asegúrate de que esto sea correcto según tu backend
+            delete: false,
           },
           reportes: {
             read: permissions.generarReportes,
-            write: false, // Asegúrate de que esto sea correcto según tu backend
-            delete: false, // Asegúrate de que esto sea correcto según tu backend
+            write: false,
+            delete: false,
           },
         },
       };
 
       try {
-        const newUser = await createUser(userData);
-        console.log("Usuario creado:", newUser);
-        setSuccessMessage(
-          `Usuario "${
-            newUser.username || newUser.fullName
-          }" creado exitosamente.`
+        const response: ApiResponse<CreateUserResponseData> = await createUser(
+          userData
         );
-        // Limpiar formulario
+
+        const newUser = response.data;
+
+        setSuccessMessage(
+          `Usuario "${newUser.username || newUser.id}" creado exitosamente.`
+        );
         setFullName("");
         setEmail("");
         setPassword("");
@@ -232,21 +248,27 @@ const CreateUserForm: React.FC<UserFormProps> = ({
           editarVentas: false,
           generarReportes: false,
         });
-        setTabValue(0); // Volver a la primera pestaña
-        onUserCreated(); // ¡Llamar a la función de callback para actualizar la tabla!
-      } catch (error: any) {
-        console.error("Error al crear usuario:", error);
-        setErrorMessage(
-          `Error al crear usuario: ${
-            error.message || "Ocurrió un error inesperado."
-          }`
-        );
+        setTabValue(0);
+        onUserCreated();
+      } catch (err: unknown) {
+        console.error("Error al crear usuario:", err);
+        let msg = "Ocurrió un error inesperado al crear el usuario.";
+
+        if (err instanceof Error) {
+          msg = err.message;
+        } else if (
+          typeof err === "object" &&
+          err !== null &&
+          "message" in err
+        ) {
+          msg = (err as ApiError).message;
+        }
+        setErrorMessage(`Error al crear usuario: ${msg}`);
       }
     }
   };
 
   const handleCancel = () => {
-    // Limpiar campos y errores al cancelar
     setFullName("");
     setEmail("");
     setPassword("");
@@ -346,9 +368,9 @@ const CreateUserForm: React.FC<UserFormProps> = ({
         <TextField
           fullWidth
           margin="normal"
-          label="Nombre Completo" // Cambiado a "Nombre Completo"
+          label="Nombre Completo"
           name="fullName"
-          value={fullName} // Usa el estado 'fullName'
+          value={fullName}
           onChange={handleInputChange}
           required
           error={!!fullNameError}
@@ -359,7 +381,7 @@ const CreateUserForm: React.FC<UserFormProps> = ({
           margin="normal"
           label="Correo Electrónico"
           name="email"
-          value={email} // Usa el estado 'email'
+          value={email}
           onChange={handleInputChange}
           required
           type="email"
@@ -371,26 +393,26 @@ const CreateUserForm: React.FC<UserFormProps> = ({
           margin="normal"
           label="Nueva Contraseña"
           name="password"
-          value={password} // Usa el estado 'password'
+          value={password}
           onChange={handleInputChange}
           required
           type="password"
           error={!!passwordError}
-          helperText={passwordError} // Muestra el error de password aquí
+          helperText={passwordError}
         />
         <TextField
           fullWidth
           margin="normal"
           label="Confirmar Nueva Contraseña"
-          name="confirmPassword" // Cambiado el name
-          value={confirmPassword} // Usa el estado 'confirmPassword'
+          name="confirmPassword"
+          value={confirmPassword}
           onChange={handleInputChange}
           required
           type="password"
           error={
             !!confirmPasswordError ||
-            (passwordError && password !== confirmPassword)
-          } // Combinar errores
+            (!!passwordError && password !== confirmPassword)
+          }
           helperText={
             confirmPasswordError ||
             (passwordError && password !== confirmPassword
@@ -403,9 +425,9 @@ const CreateUserForm: React.FC<UserFormProps> = ({
           <Select
             labelId="rol-label"
             id="rol"
-            name="roles" // El name debe coincidir con el campo de la API, que es 'roles'
-            value={role} // Usa el estado 'role'
-            onChange={handleInputChange}
+            name="roles"
+            value={role}
+            onChange={handleSelectChange}
             label="Rol"
           >
             <MenuItem value="employee">Empleado</MenuItem>

@@ -1,16 +1,23 @@
-import React, { useState } from 'react';
-import { TextField, Button, Box, Alert } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { loginUser } from '../../services/loginService';
+import React, { useState } from "react";
+import { TextField, Button, Box, Alert } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { loginUser } from "../../services/loginService";
+
+interface ApiError {
+  message: string;
+  statusCode?: number;
+}
 
 const LoginForm: React.FC = () => {
-  const [identifier, setIdentifier] = useState('');
-  const [password, setPassword] = useState('');
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleIdentifierChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleIdentifierChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setIdentifier(event.target.value);
   };
 
@@ -19,9 +26,8 @@ const LoginForm: React.FC = () => {
   };
 
   const handleCancelar = () => {
-    console.log('Cancelar');
-    setIdentifier('');
-    setPassword('');
+    setIdentifier("");
+    setPassword("");
     setError(null);
   };
 
@@ -31,12 +37,20 @@ const LoginForm: React.FC = () => {
 
     try {
       const response = await loginUser({ identifier, password });
-      console.log('Inicio de sesión exitoso:', response);
-      localStorage.setItem('jwtToken', response.jwt);
-      window.location.href = '/'; 
-    } catch (error: any) {
-      console.error('Error al iniciar sesión:', error);
-      setError(error.message || 'Error al iniciar sesión. Por favor, inténtalo de nuevo.');
+      console.log("Inicio de sesión exitoso:", response);
+      localStorage.setItem("jwtToken", response.jwt);
+      window.location.href = "/";
+    } catch (err: unknown) {
+      console.error("Error al iniciar sesión:", error);
+      let errorMessage =
+        "Error al iniciar sesión. Por favor, inténtalo de nuevo.";
+
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (typeof err === "object" && err !== null && "message" in err) {
+        errorMessage = (err as ApiError).message;
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -68,7 +82,7 @@ const LoginForm: React.FC = () => {
         value={password}
         onChange={handlePasswordChange}
       />
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
         <Button
           onClick={handleCancelar}
           startIcon={<CloseIcon />}
@@ -83,7 +97,7 @@ const LoginForm: React.FC = () => {
           onClick={handleIngresar}
           disabled={loading}
         >
-          {loading ? 'Ingresando...' : 'Ingresar'}
+          {loading ? "Ingresando..." : "Ingresar"}
         </Button>
       </Box>
       {error && (
