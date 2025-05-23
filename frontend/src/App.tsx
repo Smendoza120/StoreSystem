@@ -9,7 +9,7 @@ import UserPage from "./pages/UserPage";
 import CreateUserPage from "./pages/CreateUser";
 import MainLayout from "./components/layout/MainLayout";
 import SalesPage from "./pages/SalesPage";
-import SalesHistoryPage from "./pages/SalesHistory";
+import SalesHistoryPage from "./pages/SalesHistoryPage";
 
 const theme = createTheme();
 

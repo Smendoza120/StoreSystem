@@ -5,9 +5,8 @@ import type {
   RecordSaleResponseData,
 } from "../interfaces/sales";
 
-
-const SALES_ENDPOINT = "/sales"; 
-const SALES_HISTORY_ENDPOINT = "/sales-history"; 
+const SALES_ENDPOINT = "/sales";
+const SALES_HISTORY_ENDPOINT = "/sales/history";
 
 /**
  * Registra una nueva venta en la API.
@@ -18,13 +17,13 @@ const SALES_HISTORY_ENDPOINT = "/sales-history";
  */
 export const recordSale = async (
   products: SaleProductInput[],
-  token?: string 
+  token?: string
 ): Promise<ApiResponse<RecordSaleResponseData>> => {
   try {
     const response = await apiClient<RecordSaleResponseData>(SALES_ENDPOINT, {
       method: "POST",
       body: JSON.stringify({ products }),
-      token: token, 
+      token: token,
     });
     return response;
   } catch (error: unknown) {
@@ -43,12 +42,12 @@ export const recordSale = async (
  * @throws Error si la solicitud falla o la API devuelve un error.
  */
 export const getSalesHistory = async (
-  token?: string 
+  token?: string
 ): Promise<ApiResponse<SaleRecord[]>> => {
   try {
     const response = await apiClient<SaleRecord[]>(SALES_HISTORY_ENDPOINT, {
       method: "GET",
-      token: token, 
+      token: token,
     });
     return response;
   } catch (error: unknown) {
@@ -75,13 +74,13 @@ export const downloadInvoice = async (
 ): Promise<void> => {
   const API_BASE_URL =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
-  const url = `${API_BASE_URL}/sales/${saleId}/invoice/`; 
+  const url = `${API_BASE_URL}/sales/${saleId}/invoice/`;
 
   const headers: HeadersInit = {
     Accept: "application/pdf",
   };
   if (token) {
-    headers["Authorization"] = `Bearer ${token}`; 
+    headers["Authorization"] = `Bearer ${token}`;
   }
 
   try {
@@ -102,11 +101,11 @@ export const downloadInvoice = async (
     const downloadUrl = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = downloadUrl;
-    link.setAttribute("download", `factura_${saleId}.pdf`); 
+    link.setAttribute("download", `factura_${saleId}.pdf`);
     document.body.appendChild(link);
     link.click();
     link.remove();
-    window.URL.revokeObjectURL(downloadUrl); 
+    window.URL.revokeObjectURL(downloadUrl);
   } catch (error: unknown) {
     console.error("Error en salesService.ts -> downloadInvoice:", error);
     if (error instanceof Error) {
@@ -117,5 +116,3 @@ export const downloadInvoice = async (
     );
   }
 };
-
-
