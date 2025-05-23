@@ -2,7 +2,9 @@ import type { LoginCredentials, LoginResponse } from "../interfaces/login";
 
 const API_URL = "http://localhost:3000/api/auth";
 
-export const loginUser = async (credentials: LoginCredentials): Promise<LoginResponse> => {
+export const loginUser = async (
+  credentials: LoginCredentials
+): Promise<LoginResponse> => {
   try {
     const response = await fetch(`${API_URL}/login`, {
       method: "POST",
@@ -14,12 +16,26 @@ export const loginUser = async (credentials: LoginCredentials): Promise<LoginRes
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || `Error al iniciar sesión: ${response.status}`);
+      throw new Error(
+        errorData.message || `Error al iniciar sesión: ${response.status}`
+      );
     }
 
     return await response.json();
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error al llamar a la API de login:", error);
-    throw error;
+    let errorMessage = "Ocurrió un error inesperado al iniciar sesión.";
+    
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    } else if (
+      typeof error === "object" &&
+      error !== null &&
+      "message" in error &&
+      typeof (error as { message: unknown }).message === "string"
+    ) {
+      errorMessage = (error as { message: string }).message;
+    }
+    throw new Error(errorMessage);
   }
 };

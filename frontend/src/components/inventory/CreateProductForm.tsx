@@ -9,6 +9,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  type SelectChangeEvent,
 } from "@mui/material";
 import type { Product } from "../../interfaces/inventory";
 
@@ -43,7 +44,9 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
   const [storageLocation, setStorageLocation] = useState<
     "in stock" | "in warehouse"
   >(getSafeStorageLocation(initialValues?.storageLocation));
-  const [stockStatus, setStockStatus] = useState<Product['stockStatus']>(initialValues?.stockStatus || "good");
+  const [stockStatus, setStockStatus] = useState<Product["stockStatus"]>(
+    initialValues?.stockStatus || "good"
+  );
 
   useEffect(() => {
     if (initialValues) {
@@ -74,7 +77,9 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
     onClose();
   };
 
-  const handleChangeStorage = (event: any) => {
+  const handleChangeStorage = (
+    event: SelectChangeEvent<"in stock" | "in warehouse">
+  ) => {
     setStorageLocation(event.target.value as "in stock" | "in warehouse");
   };
 
