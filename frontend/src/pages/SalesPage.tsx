@@ -10,6 +10,7 @@ import {
   Alert,
   CircularProgress,
   Snackbar,
+  Button,
 } from "@mui/material";
 import { recordSale, downloadInvoice } from "../services/salesService";
 import {
@@ -27,6 +28,8 @@ import type {
   ProductApiResponse,
 } from "../interfaces/inventory";
 import PdfDownloadDialog from "../components/sales/PdfDownloadDialog";
+import { Link } from "react-router-dom";
+import HistoryIcon from '@mui/icons-material/History';
 
 const SalesPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -351,10 +354,10 @@ const SalesPage: React.FC = () => {
           `Venta realizada exitosamente! ID: ${response.data.sale.id}`
         );
         setSnackbarOpen(true);
-        setLastSaleId(response.data.sale.id); 
+        setLastSaleId(response.data.sale.id);
 
-        setIsConfirmationDialogOpen(false); 
-        setIsPdfDownloadDialogOpen(true); 
+        setIsConfirmationDialogOpen(false);
+        setIsPdfDownloadDialogOpen(true);
       } else {
         throw new Error(
           response.message || "Error desconocido al registrar la venta."
@@ -402,6 +405,17 @@ const SalesPage: React.FC = () => {
         <PageHeader
           title="Ventas Diarias"
           subtitle="Agrega productos para realizar una venta"
+          actionButton={
+            <Button
+              component={Link} 
+              to="/daily-sales/history" 
+              variant="contained"
+              color="primary"
+              startIcon={<HistoryIcon />} 
+            >
+              Historial de Ventas
+            </Button>
+          }
         />
 
         <ProductFilter
