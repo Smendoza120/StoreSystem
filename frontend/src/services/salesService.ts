@@ -1,90 +1,121 @@
+import { apiClient, type ApiResponse } from "../utils/apiClient";
 import type {
-  SalePayload,
-  MakeSaleResponse,
-  SaleHistoryEntry,
+  SaleProductInput,
+  SaleRecord,
+  RecordSaleResponseData,
 } from "../interfaces/sales";
 
-const API_URL = "http://localhost:3000/api";
+
+const SALES_ENDPOINT = "/sales"; 
+const SALES_HISTORY_ENDPOINT = "/sales-history"; 
 
 /**
- * Envía una nueva venta al backend.
- * La API: POST /api/sales
- * @param {SalePayload['products']} productsData Los productos y cantidades a vender.
- * @returns {Promise<MakeSaleResponse>} Una promesa que resuelve con la respuesta de la API.
+ * Registra una nueva venta en la API.
+ * @param products Los productos a vender, con su ID y cantidad.
+ * @param token Token de autenticación (opcional).
+ * @returns Una promesa que resuelve con la respuesta de la API que contiene los detalles de la venta registrada.
+ * @throws Error si la solicitud falla o la API devuelve un error.
  */
-export const makeSale = async (
-  productsData: SalePayload["products"]
-): Promise<MakeSaleResponse> => {
+export const recordSale = async (
+  products: SaleProductInput[],
+  token?: string 
+): Promise<ApiResponse<RecordSaleResponseData>> => {
   try {
-    const response = await fetch(`${API_URL}/sales`, {
+    const response = await apiClient<RecordSaleResponseData>(SALES_ENDPOINT, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ products: productsData }),
+      body: JSON.stringify({ products }),
+      token: token, 
     });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Error al realizar la venta.");
+    return response;
+  } catch (error: unknown) {
+    console.error("Error en salesService.ts -> recordSale:", error);
+    if (error instanceof Error) {
+      throw error;
     }
-    const data: MakeSaleResponse = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error en salesService.ts -> makeSale:", error);
-    throw error;
+    throw new Error("Ocurrió un error desconocido al registrar la venta.");
   }
 };
 
 /**
- * Obtiene el historial de todas las ventas realizadas.
- * La API: GET /api/sales/history
- * @returns {Promise<SaleHistoryEntry[]>} Una promesa que resuelve con un array de objetos de venta.
+ * Obtiene el historial completo de ventas de la API.
+ * @param token Token de autenticación (opcional).
+ * @returns Una promesa que resuelve con la respuesta de la API que contiene un array de `SaleRecord`.
+ * @throws Error si la solicitud falla o la API devuelve un error.
  */
-export const getSalesHistory = async (): Promise<SaleHistoryEntry[]> => {
+export const getSalesHistory = async (
+  token?: string 
+): Promise<ApiResponse<SaleRecord[]>> => {
   try {
-    const response = await fetch(`${API_URL}/sales/history`);
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(
-        errorData.message || "Error al obtener el historial de ventas."
-      );
-    }
-    const data: SaleHistoryEntry[] = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error en salesService.ts -> getSalesHistory:", error);
-    throw error;
-  }
-};
-
-/**
- * Solicita la generación de un PDF de una factura de venta.
- * La API: GET /api/sales/{id}/invoice
- * @param {string} saleId El ID de la venta para la cual se generará la factura.
- * @returns {Promise<Blob>} Una promesa que resuelve con un Blob que representa el archivo PDF.
- */
-export const getSaleInvoicePdf = async (saleId: string): Promise<Blob> => {
-  try {
-    const response = await fetch(`${API_URL}/sales/${saleId}/invoice`, {
+    const response = await apiClient<SaleRecord[]>(SALES_HISTORY_ENDPOINT, {
       method: "GET",
-      headers: {
-        Accept: "application/pdf",
-      },
+      token: token, 
     });
-
-    if (!response.ok) {
-      const errorData = await response
-        .json()
-        .catch(() => ({
-          message: "Error desconocido al generar la factura PDF.",
-        }));
-      throw new Error(errorData.message || "Error al generar la factura PDF.");
+    return response;
+  } catch (error: unknown) {
+    console.error("Error en salesService.ts -> getSalesHistory:", error);
+    if (error instanceof Error) {
+      throw error;
     }
-    const pdfBlob = await response.blob();
-    return pdfBlob;
-  } catch (error) {
-    console.error("Error en salesService.ts -> getSaleInvoicePdf:", error);
-    throw error;
+    throw new Error(
+      "Ocurrió un error desconocido al obtener el historial de ventas."
+    );
   }
 };
+
+/**
+ * Descarga la factura en PDF para una venta específica.
+ * @param saleId El ID de la venta.
+ * @param token Token de autenticación (opcional).
+ * @returns Una promesa que resuelve cuando la descarga ha sido iniciada.
+ * @throws Error si la solicitud falla.
+ */
+export const downloadInvoice = async (
+  saleId: string,
+  token?: string // Hacemos el token opcional con '?'
+): Promise<void> => {
+  const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+  const url = `${API_BASE_URL}/sales/invoice/${saleId}`; 
+
+  const headers: HeadersInit = {
+    Accept: "application/pdf",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`; 
+  }
+
+  try {
+    const response = await fetch(url, { headers });
+
+    if (!response.ok) {
+      let errorMessage = `Error ${response.status}: ${response.statusText}`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch {
+        // Si no es JSON, simplemente usamos el mensaje HTTP
+      }
+      throw new Error(errorMessage);
+    }
+
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.setAttribute("download", `factura_${saleId}.pdf`); 
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(downloadUrl); 
+  } catch (error: unknown) {
+    console.error("Error en salesService.ts -> downloadInvoice:", error);
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(
+      "Ocurrió un error desconocido al intentar descargar la factura."
+    );
+  }
+};
+
+

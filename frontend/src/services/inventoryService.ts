@@ -36,7 +36,7 @@ export const createProduct = async (
  */
 export const updateProduct = async (
   updatedProduct: Product,
-  token: string
+  token?: string
 ): Promise<ProductSingleResponse> => {
   return apiClient<Product>(`/inventory/${updatedProduct.id}`, {
     method: "PUT",
@@ -53,7 +53,7 @@ export const updateProduct = async (
  * @throws {Error} Lanza un error si la solicitud falla.
  */
 export const getAllInventoryProducts = async (
-  token: string
+  token?: string
 ): Promise<ProductApiResponse> => {
   return apiClient<PaginatedProductsData>("/inventory", { token });
 };
@@ -68,7 +68,7 @@ export const getAllInventoryProducts = async (
  */
 export const searchProductsByName = async (
   searchTerm: string,
-  token: string
+  token?: string
 ): Promise<ProductApiResponse> => {
   const encodedSearchTerm = encodeURIComponent(searchTerm);
   return apiClient<PaginatedProductsData>(

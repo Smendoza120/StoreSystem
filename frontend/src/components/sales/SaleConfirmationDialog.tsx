@@ -1,13 +1,6 @@
 import React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Box } from '@mui/material';
-
-interface SaleItem {
-  id: string;
-  name: string;
-  quantity: number;
-  unitPrice: number;
-  totalPrice: number;
-}
+import type { SaleItem } from '../../interfaces/sales';
 
 interface SaleConfirmationDialogProps {
   open: boolean;

@@ -12,9 +12,8 @@ const USER_ENDPOINT = "/users";
  */
 export const createUser = async (
   userData: UserData,
-  token: string = "" // Valor por defecto para el token
+  token: string = ""
 ): Promise<ApiResponse<{ id: string; username: string }>> => {
-  // El backend devuelve { success: true, message: "...", data: { id, username } }
   try {
     const response = await apiClient<{ id: string; username: string }>(
       USER_ENDPOINT,
@@ -29,7 +28,6 @@ export const createUser = async (
     if (error instanceof Error) {
       throw error;
     }
-    // Si no es una instancia de Error, lanzamos un nuevo Error genérico
     throw new Error("Ocurrió un error desconocido al crear el usuario.");
   }
 };
@@ -41,9 +39,8 @@ export const createUser = async (
  * @throws Error si la solicitud falla.
  */
 export const getAllUsers = async (
-  token: string = "" // Valor por defecto para el token
+  token: string = ""
 ): Promise<ApiResponse<UserDataTable[]>> => {
-  // El backend devuelve { success: true, message: "...", data: UserDataTable[] }
   try {
     const response = await apiClient<UserDataTable[]>(`${USER_ENDPOINT}`, {
       method: "GET",
@@ -67,16 +64,15 @@ export const getAllUsers = async (
  */
 export const disableUser = async (
   userId: string,
-  token: string = "" // Valor por defecto para el token
+  token: string = ""
 ): Promise<ApiResponse<null>> => {
-  // El backend devuelve { success: true, message: "..." }
   if (!userId) {
     throw new Error("El ID del usuario es requerido para deshabilitar.");
   }
 
   try {
     const response = await apiClient<null>(
-      `${USER_ENDPOINT}/${userId}/disable`, // Asegúrate que esta ruta coincide con tu backend
+      `${USER_ENDPOINT}/${userId}/disable`,
       {
         method: "PUT",
         token: token,
@@ -98,16 +94,15 @@ export const disableUser = async (
  */
 export const enableUser = async (
   userId: string,
-  token: string = "" // Valor por defecto para el token
+  token: string = ""
 ): Promise<ApiResponse<null>> => {
-  // El backend devuelve { success: true, message: "..." }
   if (!userId) {
     throw new Error("El ID del usuario es requerido para habilitar.");
   }
 
   try {
     const response = await apiClient<null>(
-      `${USER_ENDPOINT}/${userId}/enable`, // Asume que tienes un endpoint similar para habilitar
+      `${USER_ENDPOINT}/${userId}/enable`,
       {
         method: "PUT",
         token: token,

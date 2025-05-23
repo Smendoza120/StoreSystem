@@ -12,14 +12,7 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import NoDataDisplay from "../common/NoDataDisplay";
-
-interface SaleItem {
-  id: string;
-  name: string;
-  quantity: number;
-  unitPrice: number;
-  totalPrice: number;
-}
+import type { SaleItem } from "../../interfaces/sales";
 
 interface SalesTableProps {
   saleItems: SaleItem[];

@@ -88,11 +88,12 @@
 # Tareas pendientes
 - [X] Crear 2 IAS una para solucionar front y otra para solucionar back de este proyecto
 - [X] API para eliminar productos
-- [] Organizar todo el backend
-- [] Agregar lista de categorias y estados para el filtro
-- [] Hacer el filtro en la parte front
+- [X] Organizar todo el backend
 - [] Realizar las ventas diarias
 - [] Realizar la tabla con las ventas diarias
+- [] Realizar la paginacion de las ventas diarias
+- [] Agregar lista de categorias y estados para el filtro
+- [] Hacer el filtro en la parte front
 - [] Realizar la generacion de facturas en la venta y en la tabla
 - [] Agregar los permisos con el token de sesion
 - [] Mejorar los Anys de todo el codigo

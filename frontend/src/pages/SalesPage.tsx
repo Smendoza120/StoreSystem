@@ -11,17 +11,21 @@ import {
   CircularProgress,
   Snackbar,
 } from "@mui/material";
-import { makeSale } from "../services/salesService";
+import { recordSale } from "../services/salesService";
 import {
   getAllInventoryProducts,
   searchProductsByName,
 } from "../services/inventoryService";
-
+import type { ApiResponse } from "../utils/apiClient";
 import type {
-  InventoryProduct,
   SaleItem,
   SalePayload,
+  RecordSaleResponseData,
 } from "../interfaces/sales";
+import type {
+  Product as InventoryProduct,
+  ProductApiResponse,
+} from "../interfaces/inventory";
 
 const SalesPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -43,26 +47,49 @@ const SalesPage: React.FC = () => {
     "success"
   );
 
+  const authToken = "";
+
   const fetchAllInventoryProducts = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const products = await getAllInventoryProducts();
-      setFullInventoryProducts(products);
-    } catch (err: any) {
-      setError(
-        err.message ||
-          "Error al cargar los productos del inventario para validación."
+      const response: ProductApiResponse = await getAllInventoryProducts(
+        authToken
       );
+
+      if (
+        response.success &&
+        response.data &&
+        Array.isArray(response.data.products)
+      ) {
+        setFullInventoryProducts(response.data.products);
+      } else {
+        setError(
+          response.message || "Error al cargar productos del inventario."
+        );
+        setSnackbarSeverity("error");
+        setSnackbarMessage(
+          response.message ||
+            "Error al cargar productos de inventario completo."
+        );
+        setSnackbarOpen(true);
+        setFullInventoryProducts([]);
+      }
+    } catch (err: unknown) {
+      console.error("Error al cargar los productos del inventario:", err);
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Error desconocido al cargar productos de inventario.";
+      setError(errorMessage);
       setSnackbarSeverity("error");
-      setSnackbarMessage(
-        err.message || "Error al cargar productos de inventario completo."
-      );
+      setSnackbarMessage(errorMessage);
       setSnackbarOpen(true);
+      setFullInventoryProducts([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [authToken]);
 
   useEffect(() => {
     fetchAllInventoryProducts();
@@ -74,14 +101,42 @@ const SalesPage: React.FC = () => {
         setLoading(true);
         setError(null);
         try {
-          const results = await searchProductsByName(searchTerm);
-          console.log("Resultados de búsqueda:", results);
-          const inStockResults = results.filter((product) => product.stock > 0);
-          setFilteredProducts(inStockResults);
-        } catch (err: any) {
-          setError(err.message || "Error al buscar productos.");
+          const response: ProductApiResponse = await searchProductsByName(
+            searchTerm,
+            authToken
+          );
+
+          console.log("Respuesta completa de searchProductsByName:", response); 
+
+          if (response.success && response.data) {
+            const productsFound: InventoryProduct[] =
+              response.data as unknown as InventoryProduct[];
+
+            setFilteredProducts(productsFound);
+
+            if (response.message) {
+              setSnackbarSeverity("success"); 
+              setSnackbarMessage(response.message);
+              setSnackbarOpen(true);
+            }
+          } else {
+            setError(response.message || "Error al buscar productos.");
+            setSnackbarSeverity("error");
+            setSnackbarMessage(
+              response.message || "Error al buscar productos."
+            );
+            setSnackbarOpen(true);
+            setFilteredProducts([]);
+          }
+        } catch (err: unknown) {
+          console.error("Error al buscar productos:", err);
+          const errorMessage =
+            err instanceof Error
+              ? err.message
+              : "Error desconocido al buscar productos.";
+          setError(errorMessage);
           setSnackbarSeverity("error");
-          setSnackbarMessage(err.message || "Error al buscar productos.");
+          setSnackbarMessage(errorMessage);
           setSnackbarOpen(true);
           setFilteredProducts([]);
         } finally {
@@ -93,7 +148,7 @@ const SalesPage: React.FC = () => {
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchTerm]);
+  }, [searchTerm, authToken]);
 
   useEffect(() => {
     const calculatedTotal = saleItems.reduce(
@@ -137,6 +192,17 @@ const SalesPage: React.FC = () => {
       return;
     }
 
+    if (inventoryProductForStock.quantity <= 0) {
+      setSnackbarSeverity("error");
+      setSnackbarMessage(
+        `El producto "${product.name}" está agotado y no puede ser agregado.`
+      );
+      setSnackbarOpen(true);
+      setSearchTerm("");
+      setFilteredProducts([]);
+      return;
+    }
+
     const existingItemIndex = saleItems.findIndex(
       (item) => item.id === product.id
     );
@@ -145,7 +211,7 @@ const SalesPage: React.FC = () => {
       const updatedSaleItems = [...saleItems];
       const currentItem = updatedSaleItems[existingItemIndex];
 
-      if (inventoryProductForStock.stock > currentItem.quantity) {
+      if (inventoryProductForStock.quantity > currentItem.quantity) {
         updatedSaleItems[existingItemIndex] = {
           ...currentItem,
           quantity: currentItem.quantity + 1,
@@ -153,26 +219,26 @@ const SalesPage: React.FC = () => {
         };
         setSaleItems(updatedSaleItems);
       } else {
-        setSnackbarSeverity("warning");
+        setSnackbarSeverity("error");
         setSnackbarMessage(
-          `No hay suficiente stock para agregar más de ${product.name}. Stock disponible: ${inventoryProductForStock.stock}`
+          `No hay suficiente stock para agregar más de ${product.name}. Stock disponible: ${inventoryProductForStock.quantity}`
         );
         setSnackbarOpen(true);
       }
     } else {
-      if (inventoryProductForStock.stock > 0) {
+      if (inventoryProductForStock.quantity > 0) {
         setSaleItems((prevItems) => [
           ...prevItems,
           {
             id: product.id,
             name: product.name,
             quantity: 1,
-            unitPrice: product.price,
-            totalPrice: product.price,
+            unitPrice: product.unitPrice,
+            totalPrice: product.unitPrice,
           },
         ]);
       } else {
-        setSnackbarSeverity("warning");
+        setSnackbarSeverity("error");
         setSnackbarMessage(
           `El producto ${product.name} no tiene stock disponible.`
         );
@@ -192,14 +258,17 @@ const SalesPage: React.FC = () => {
           );
           if (
             inventoryProductForStock &&
-            newQuantity > inventoryProductForStock.stock
+            newQuantity > inventoryProductForStock.quantity
           ) {
-            setSnackbarSeverity("warning");
+            setSnackbarSeverity("error");
             setSnackbarMessage(
-              `No hay suficiente stock para esta cantidad de ${item.name}. Stock disponible: ${inventoryProductForStock.stock}`
+              `No hay suficiente stock para esta cantidad de ${item.name}. Stock disponible: ${inventoryProductForStock.quantity}`
             );
             setSnackbarOpen(true);
-            const quantityToUse = Math.max(1, inventoryProductForStock.stock);
+            const quantityToUse = Math.max(
+              1,
+              inventoryProductForStock.quantity
+            );
             return {
               ...item,
               quantity: quantityToUse,
@@ -224,7 +293,7 @@ const SalesPage: React.FC = () => {
 
   const handleMakeSale = () => {
     if (saleItems.length === 0) {
-      setSnackbarSeverity("warning");
+      setSnackbarSeverity("error");
       setSnackbarMessage("Agregue productos a la venta antes de realizarla.");
       setSnackbarOpen(true);
       return;
@@ -241,28 +310,35 @@ const SalesPage: React.FC = () => {
     }));
 
     try {
-      const response = await makeSale(productsForSale);
-      console.log("Venta realizada:", response);
-      setSnackbarSeverity("success");
-      setSnackbarMessage(
-        `Venta realizada exitosamente! ID: ${response.saleId}`
+      const response: ApiResponse<RecordSaleResponseData> = await recordSale(
+        productsForSale
       );
-      setSnackbarOpen(true);
 
-      setSaleItems([]);
-      setTotalSale(0);
-      setSearchTerm("");
-      setFilteredProducts([]);
+      if (response.success && response.data?.sale) {
+        setSnackbarSeverity("success");
+        setSnackbarMessage(
+          `Venta realizada exitosamente! ID: ${response.data.sale.id}`
+        );
+        setSnackbarOpen(true);
 
-      fetchAllInventoryProducts();
-    } catch (err: any) {
+        setSaleItems([]);
+        setTotalSale(0);
+        setSearchTerm("");
+        setFilteredProducts([]);
+        fetchAllInventoryProducts();
+      } else {
+        throw new Error(
+          response.message || "Error desconocido al registrar la venta."
+        );
+      }
+    } catch (err: unknown) {
       console.error("Error al confirmar la venta:", err);
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Ocurrió un error inesperado al realizar la venta.";
       setSnackbarSeverity("error");
-      setSnackbarMessage(
-        `Error al realizar la venta: ${
-          err.message || "Ocurrió un error inesperado."
-        }`
-      );
+      setSnackbarMessage(`Error al realizar la venta: ${errorMessage}`);
       setSnackbarOpen(true);
     }
   };
@@ -271,8 +347,8 @@ const SalesPage: React.FC = () => {
     setIsConfirmationDialogOpen(false);
   };
 
-  const displayLoading = loading && searchTerm.length === 0;
-  const displaySearchLoading = loading && searchTerm.length > 0;
+  const displayLoadingContent = loading && searchTerm.length === 0;
+  const displaySearchLoadingContent = loading && searchTerm.length > 0;
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -288,13 +364,22 @@ const SalesPage: React.FC = () => {
           filteredProducts={filteredProducts}
           onProductSelect={handleProductSelect}
         />
-        {displaySearchLoading && (
+
+        {displayLoadingContent && (
           <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
             <CircularProgress size={24} />
-            <Typography sx={{ ml: 1 }}>Buscando...</Typography>
+            <Typography sx={{ ml: 1 }}>Cargando inventario...</Typography>
           </Box>
         )}
-        {error && !displaySearchLoading && (
+
+        {displaySearchLoadingContent && (
+          <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
+            <CircularProgress size={24} />
+            <Typography sx={{ ml: 1 }}>Buscando productos...</Typography>
+          </Box>
+        )}
+
+        {error && !loading && (
           <Alert severity="error" sx={{ my: 2 }}>
             {error}
           </Alert>
