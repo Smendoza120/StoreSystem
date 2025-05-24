@@ -1,4 +1,4 @@
-import app from "./netlify/functions/app.mjs";
+import app from "./src/app.mjs";
 
 const port = 3000;
 
