@@ -142,7 +142,7 @@ const InventoryPage: React.FC = () => {
   };
 
   const handleChangePage = (
-    event: React.ChangeEvent<unknown>,
+    _event: React.ChangeEvent<unknown>,
     newPage: number
   ) => {
     setPage(newPage);
@@ -154,7 +154,7 @@ const InventoryPage: React.FC = () => {
   };
 
   const handleCloseSnackbar = (
-    event: React.SyntheticEvent | Event,
+    _event: React.SyntheticEvent | Event,
     reason?: string
   ) => {
     if (reason === "clickaway") {

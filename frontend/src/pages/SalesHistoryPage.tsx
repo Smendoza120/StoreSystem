@@ -103,7 +103,7 @@ const SalesHistoryPage: React.FC = () => {
   const currentSales = filteredSales.slice(startIndex, endIndex);
 
   const handleChangePage = (
-    event: React.ChangeEvent<unknown>,
+    _event: React.ChangeEvent<unknown>,
     newPage: number
   ) => {
     setPage(newPage);
@@ -115,7 +115,7 @@ const SalesHistoryPage: React.FC = () => {
   };
 
   const handleSnackbarClose = (
-    event?: React.SyntheticEvent | Event,
+    _event?: React.SyntheticEvent | Event,
     reason?: string
   ) => {
     if (reason === "clickaway") {

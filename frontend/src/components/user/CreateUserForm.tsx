@@ -91,7 +91,7 @@ const CreateUserForm: React.FC<UserFormProps> = ({
     setErrorMessage("");
   }, [tabValue]);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 

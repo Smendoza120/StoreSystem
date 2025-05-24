@@ -120,7 +120,7 @@ const UserPage: React.FC = () => {
   }, [fetchUsers]);
 
   const handleChangePage = (
-    event: React.ChangeEvent<unknown>,
+    _event: React.ChangeEvent<unknown>,
     newPage: number
   ) => {
     setPage(newPage);

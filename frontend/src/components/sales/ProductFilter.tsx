@@ -25,9 +25,9 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
             option.quantity
           })`
         }
-        onChange={(event, newValue) => onProductSelect(newValue)}
+        onChange={(_event, newValue) => onProductSelect(newValue)}
         inputValue={searchTerm}
-        onInputChange={(event, newInputValue) => {
+        onInputChange={(_event, newInputValue) => {
           onSearchChange(newInputValue);
         }}
         renderInput={(params) => (
