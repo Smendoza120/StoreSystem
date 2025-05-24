@@ -1,4 +1,4 @@
-import app from "./src/app.mjs";
+import app from "./index.mjs";
 
 const port = 3000;
 
