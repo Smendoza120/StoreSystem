@@ -9,7 +9,7 @@ import * as userController from './src/controllers/users.controller.mjs';
 import userRoutes from './src/routes/user.routes.mjs';
 import salesRoutes from './src/routes/sales.routes.mjs';
 import inventoryRoutes from './src/routes/inventory.routes.mjs';
-import app from './src/app.mjs';
+// import app from './src/app.mjs';
 
 const app = express();
 
