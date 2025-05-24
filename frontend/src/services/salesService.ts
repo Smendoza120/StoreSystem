@@ -72,8 +72,11 @@ export const downloadInvoice = async (
   saleId: string,
   token?: string // Hacemos el token opcional con '?'
 ): Promise<void> => {
+  // const API_BASE_URL =
+  //   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
   const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+    import.meta.env.VITE_API_BASE_URL ||
+    "https://store-system-nu.vercel.app/api";
   const url = `${API_BASE_URL}/sales/${saleId}/invoice/`;
 
   const headers: HeadersInit = {

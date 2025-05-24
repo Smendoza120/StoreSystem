@@ -1,6 +1,7 @@
 import type { LoginCredentials, LoginResponse } from "../interfaces/login";
 
-const API_URL = "http://localhost:3000/api/auth";
+// const API_URL = "http://localhost:3000/api/auth";
+const API_URL = "https://store-system-nu.vercel.app/api/auth";
 
 export const loginUser = async (
   credentials: LoginCredentials

@@ -40,8 +40,10 @@ export async function apiClient<T>(
   endpoint: string,
   options?: RequestOptions
 ): Promise<ApiResponse<T>> {
+  // const API_BASE_URL =
+  //   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
   const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+    "https://store-system-nu.vercel.app/api";
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
