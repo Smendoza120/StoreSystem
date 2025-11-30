@@ -20,16 +20,14 @@ const App: React.FC = () => {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />{" "}
-          {/* El login no usa el Layout */}
           <Route path="/" element={<MainLayout />}>
             {" "}
-            {/* Usa el Layout como elemento de la ruta padre */}
             <Route path="/inventory" element={<InventoryPage />} />
             <Route path="/users" element={<UserPage />} />
             <Route path="/users/create" element={<CreateUserPage />} />
             <Route path="/daily-sales" element={<SalesPage />} />
             <Route path="/daily-sales/history" element={<SalesHistoryPage />} />
-            <Route index element={<InventoryPage />} /> {/* Ruta por defecto */}
+            <Route index element={<InventoryPage />} /> 
           </Route>
         </Routes>
       </BrowserRouter>

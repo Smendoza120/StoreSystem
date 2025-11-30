@@ -4,7 +4,7 @@ import path from "path";
 
 const options = {
   definition: {
-    openapi: "3.0.1", // O la versión de OpenAPI que desees
+    openapi: "3.0.1", 
     info: {
       title: "API de Control de Inventario",
       version: "1.0.0",
@@ -13,11 +13,14 @@ const options = {
     },
     servers: [
       {
-        url: "https://store-system-nu.vercel.app" || "http://localhost:3000", // Asegúrate de que la URL base de tu API sea correcta
+        url: "http://localhost:3000", 
+      },
+      {
+        url: "https://store-system-nu.vercel.app" 
       },
     ],
   },
-  apis: ["./src/swagger-docs/*.yaml"], // Especifica la ruta a tus archivos .yaml
+  apis: ["./src/swagger-docs/*.yaml"], 
 };
 
 const swaggerSpec = swaggerJsdoc(options);

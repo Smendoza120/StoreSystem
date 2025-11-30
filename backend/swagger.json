@@ -7,9 +7,6 @@
   },
   "servers": [
     {
-      "url": "https://store-system-nu.vercel.app"
-    },
-    {
       "url": "http://localhost:3000"
     }
   ],
